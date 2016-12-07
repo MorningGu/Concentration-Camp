@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 
 import hero.concentrationcamp.mvp.BasePresenter;
 import hero.concentrationcamp.mvp.IBaseView;
+import hero.concentrationcamp.utils.ToastUtils;
 
 /**
  * Created by hero on 2016/12/1 0001.
@@ -72,6 +73,21 @@ public abstract class BaseFragment<V,T extends BasePresenter<V>> extends Fragmen
             ((ViewGroup) inflateView.getParent()).removeView(inflateView);
         }
     }
+    private void detachPresenter(){
+        //presenter与activity解绑定
+        if(null != mPresenter){
+            mPresenter.dispose();
+            mPresenter.detachView();
+            mPresenter = null;
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        detachPresenter();
+        super.onDestroy();
+    }
+
     @Override
     public void initPresenter() {
         //初始化Presenter
@@ -113,5 +129,10 @@ public abstract class BaseFragment<V,T extends BasePresenter<V>> extends Fragmen
     @Override
     public void showUpdateDialog(boolean isForce, String url) {
 
+    }
+
+    @Override
+    public void showError(String msg) {
+        ToastUtils.showToast(msg);
     }
 }

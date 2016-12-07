@@ -22,7 +22,7 @@ public class GApplication extends Application {
 
     private static GApplication sInstance; //s的前缀，表示static m的前缀表示member
 
-    private boolean isDebug = false;
+    private boolean isDebug = true;
 
     public void onCreate() {
         super.onCreate();
@@ -59,14 +59,14 @@ public class GApplication extends Application {
      */
     private void initDebug(){
         ApplicationInfo appInfo = null;
-        try {
-            appInfo = GApplication.getInstance().getPackageManager()
-                    .getApplicationInfo(GApplication.getInstance().getPackageName(),
-                            PackageManager.GET_META_DATA);
-            isDebug =  appInfo.metaData.getBoolean("IS_DEBUG");
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            appInfo = GApplication.getInstance().getPackageManager()
+//                    .getApplicationInfo(GApplication.getInstance().getPackageName(),
+//                            PackageManager.GET_META_DATA);
+//            isDebug =  appInfo.metaData.getBoolean("IS_DEBUG");
+//        } catch (PackageManager.NameNotFoundException e) {
+//            e.printStackTrace();
+//        }
         LogUtils.isDebug(isDebug);
     }
 

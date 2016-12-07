@@ -11,6 +11,7 @@ public interface IBaseView {
      * 需要放到View最开始初始化的方法中，用来初始化presenter
      */
     void initPresenter();
+    void showError(String msg);
 
     /**
      * 用来弹出更新的dialog

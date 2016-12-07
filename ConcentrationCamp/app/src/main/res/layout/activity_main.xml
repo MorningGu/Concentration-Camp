@@ -9,7 +9,6 @@
         android:id="@+id/drawerLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/transparent"
         >
 
         <FrameLayout
@@ -18,18 +17,17 @@
             android:layout_height="match_parent">
 
         </FrameLayout>
-
-
         <android.support.design.widget.NavigationView
             android:fitsSystemWindows="true"
             android:id="@+id/navigation"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@android:color/transparent"
             android:paddingTop="?attr/actionBarSize"
             android:layout_gravity="start"
+            android:background="@android:color/transparent"
             app:headerLayout="@layout/drawer_header"
-            app:menu="@menu/drawer_menu">
+            app:menu="@menu/drawer_menu"
+            >
 
         </android.support.design.widget.NavigationView>
 

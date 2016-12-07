@@ -4,10 +4,15 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.internal.NavigationMenuView;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 import hero.concentrationcamp.R;
 import hero.concentrationcamp.mvp.contract.MainContract;
@@ -19,9 +24,9 @@ public class MainActivity extends BaseActivity<MainContract.IMainActivityView,Ma
 
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigation;
-    private MenuItem mCurrentItem;
     private BaseFragment mCurrentFragment;
     private GankFragment mGankFragment;
+    private MenuItem mCurrentItem;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

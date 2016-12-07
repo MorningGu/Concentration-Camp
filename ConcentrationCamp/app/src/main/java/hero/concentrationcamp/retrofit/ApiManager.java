@@ -1,0 +1,95 @@
+package hero.concentrationcamp.retrofit;
+
+
+import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+
+import org.reactivestreams.Subscription;
+
+import java.util.concurrent.TimeUnit;
+
+import hero.concentrationcamp.GApplication;
+import hero.concentrationcamp.utils.LogUtils;
+import io.reactivex.Flowable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.LongConsumer;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subscribers.ResourceSubscriber;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+/**
+ * Created by hero on 2016/9/6 0006.
+ */
+
+public enum ApiManager {
+    INSTANCE;
+    private ICampInterface iCampInterface;
+    private Object monitor = new Object();
+    /**
+     * 这一部分配置常量，可以抽取出常量类
+     */
+    private static final long DEFAULT_TIMEOUT = 10000;//默认超时时间(毫秒)
+
+    /**
+     * 取得实例化的Retrofit
+     * 可以根据不同的需求获取不同的Retrofit实例
+     * @return
+     */
+    public ICampInterface getICampInterface(){
+        if (iCampInterface == null) {
+            synchronized (monitor) {
+                if (iCampInterface == null) {
+                    //打印拦截器
+                    HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+                    logging.setLevel(GApplication.getInstance().isDebug()?HttpLoggingInterceptor.Level.BODY:HttpLoggingInterceptor.Level.NONE);
+                    // 公私密匙
+                    //MarvelSigningInterceptor signingInterceptor = new MarvelSigningInterceptor(KeyValue.MARVEL_PUBLIC_KEY, KeyValue.MARVEL_PRIVATE_KEY);
+                    OkHttpClient.Builder okHttpClient = new OkHttpClient.Builder();
+                    okHttpClient.addNetworkInterceptor(new HTTPInterceptor())
+                            .retryOnConnectionFailure(true)//设置出现错误进行重新连接。;
+                            //.addInterceptor(signingInterceptor)//加密处理
+                            .connectTimeout(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS)
+                            .readTimeout(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS)
+                            .addInterceptor(logging);
+
+                    iCampInterface = new Retrofit.Builder()
+                            .client(okHttpClient.build())
+                            .addConverterFactory(GsonConverterFactory.create())
+                            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                            .baseUrl("http://gank.io/api/")
+                            .build().create(ICampInterface.class);
+                }
+            }
+        }
+        return iCampInterface;
+    }
+    /**
+     * 初始化通用的观察者
+     * @param observable 观察者
+     */
+    public ResourceSubscriber startObservable(Flowable observable, ResourceSubscriber subscriber) {
+       return (ResourceSubscriber)observable.subscribeOn(Schedulers.io())
+               .observeOn(AndroidSchedulers.mainThread())
+               .doOnLifecycle(new Consumer<Subscription>() {
+                   @Override
+                   public void accept(Subscription subscription) throws Exception {
+                       LogUtils.d("doOnLifecycle","OnSubscribe");
+                   }
+               }, new LongConsumer() {
+                   @Override
+                   public void accept(long t) throws Exception {
+                       LogUtils.d("doOnLifecycle","OnRequest");
+                   }
+               }, new Action() {
+                   @Override
+                   public void run() throws Exception {
+                       LogUtils.d("doOnLifecycle","OnCancel");
+                   }
+               })
+               .subscribeWith(subscriber);
+    }
+}

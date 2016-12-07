@@ -12,6 +12,7 @@ import hero.concentrationcamp.mvp.BasePresenter;
 import hero.concentrationcamp.mvp.IBaseView;
 import hero.concentrationcamp.utils.AppManager;
 import hero.concentrationcamp.utils.LogUtils;
+import hero.concentrationcamp.utils.ToastUtils;
 
 
 /**
@@ -97,5 +98,10 @@ public abstract class BaseActivity<V,T extends BasePresenter<V>> extends AppComp
     @Override
     public void showUpdateDialog(boolean isForce, String url) {
 
+    }
+
+    @Override
+    public void showError(String msg) {
+        ToastUtils.showToast(msg);
     }
 }
