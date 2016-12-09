@@ -20,6 +20,6 @@ public class GankSubFragmentDataFactory {
      * @return
      */
     public Flowable<GankVo> getDataList(SourceColumn column, int pageNo){
-        return ApiManager.INSTANCE.getICampInterface().getGankList(column.getCode(),10,pageNo);
+        return ApiManager.INSTANCE.getIGankInterface().getGankList(column.getCode(),10,pageNo);
     }
 }

@@ -13,10 +13,10 @@ import hero.concentrationcamp.ui.BaseFragment;
  * Created by hero on 2016/12/2 0002.
  */
 
-public class GankFragmentAdapter extends FragmentStatePagerAdapter {
+public class SubFragmentAdapter extends FragmentStatePagerAdapter {
     private List<BaseFragment> mFragments;
     private SourceColumn[]  mColumns;
-    public GankFragmentAdapter(FragmentManager fm, List<BaseFragment> fragments,SourceColumn[] columns) {
+    public SubFragmentAdapter(FragmentManager fm, List<BaseFragment> fragments, SourceColumn[] columns) {
         super(fm);
         mFragments = fragments;
         mColumns = columns;

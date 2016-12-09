@@ -1,23 +1,18 @@
 package hero.concentrationcamp.ui;
 
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.internal.NavigationMenuView;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
 import hero.concentrationcamp.R;
 import hero.concentrationcamp.mvp.contract.MainContract;
 import hero.concentrationcamp.mvp.presenter.MainActivityPresenter;
 import hero.concentrationcamp.ui.gank.GankFragment;
+import hero.concentrationcamp.ui.joke.JokeFragment;
 import hero.concentrationcamp.utils.ToastUtils;
 
 public class MainActivity extends BaseActivity<MainContract.IMainActivityView,MainActivityPresenter> implements MainContract.IMainActivityView{
@@ -26,6 +21,7 @@ public class MainActivity extends BaseActivity<MainContract.IMainActivityView,Ma
     private NavigationView mNavigation;
     private BaseFragment mCurrentFragment;
     private GankFragment mGankFragment;
+    private JokeFragment mJokeFragment;
     private MenuItem mCurrentItem;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +50,11 @@ public class MainActivity extends BaseActivity<MainContract.IMainActivityView,Ma
             }
         }
     }
+
+    /**
+     * 初始化侧边栏
+     */
     private void initNavigation(){
-        mDrawerLayout.setScrimColor(Color.TRANSPARENT);
         ColorStateList csl=getResources().getColorStateList(R.color.selector_menu_text);
         mNavigation.setItemTextColor(csl);
         mNavigation.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -65,14 +64,14 @@ public class MainActivity extends BaseActivity<MainContract.IMainActivityView,Ma
                 mCurrentItem = item;
                 switch (item.getItemId()) {
                     case R.id.drawer_gank:
-//                        switchFragment(mTodayFragment);
-//                        mCurrentFragment = mTodayFragment;
+                        switchFragment(mGankFragment);
+                        mCurrentFragment = mGankFragment;
                         break;
-                    case R.id.drawer_duanzi:
-//                        switchFragment(mLikeFragment);
-//                        mCurrentFragment = mLikeFragment;
+                    case R.id.drawer_joke:
+                        switchFragment(mJokeFragment);
+                        mCurrentFragment = mJokeFragment;
                         break;
-                    case R.id.drawer_meipai:
+                    case R.id.drawer_collect:
 //                        switchFragment(mAboutFragment);
 //                        mCurrentFragment = mAboutFragment;
                         break;
@@ -94,9 +93,8 @@ public class MainActivity extends BaseActivity<MainContract.IMainActivityView,Ma
     private void initFragment(){
         mGankFragment = new GankFragment();
         mGankFragment.setDrawerLayout(mDrawerLayout);
-//        mTodayFragment = new TodayInHistoryFragment();
-//        mLikeFragment = new LikeFragment();
-//        mAboutFragment = new AboutFragment();
+        mJokeFragment = new JokeFragment();
+        mJokeFragment.setDrawerLayout(mDrawerLayout);
         mCurrentFragment = mGankFragment;
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.fl_main, mCurrentFragment)

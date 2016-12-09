@@ -27,7 +27,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public enum ApiManager {
     INSTANCE;
-    private ICampInterface iCampInterface;
+    private IGankInterface gankInterface;
+    private IJokeInterface jokeInterface;
     private Object monitor = new Object();
     /**
      * 这一部分配置常量，可以抽取出常量类
@@ -39,10 +40,10 @@ public enum ApiManager {
      * 可以根据不同的需求获取不同的Retrofit实例
      * @return
      */
-    public ICampInterface getICampInterface(){
-        if (iCampInterface == null) {
+    public IGankInterface getIGankInterface(){
+        if (gankInterface == null) {
             synchronized (monitor) {
-                if (iCampInterface == null) {
+                if (gankInterface == null) {
                     //打印拦截器
                     HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
                     logging.setLevel(GApplication.getInstance().isDebug()?HttpLoggingInterceptor.Level.BODY:HttpLoggingInterceptor.Level.NONE);
@@ -56,16 +57,49 @@ public enum ApiManager {
                             .readTimeout(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS)
                             .addInterceptor(logging);
 
-                    iCampInterface = new Retrofit.Builder()
+                    gankInterface = new Retrofit.Builder()
                             .client(okHttpClient.build())
                             .addConverterFactory(GsonConverterFactory.create())
                             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                             .baseUrl("http://gank.io/api/")
-                            .build().create(ICampInterface.class);
+                            .build().create(IGankInterface.class);
                 }
             }
         }
-        return iCampInterface;
+        return gankInterface;
+    }
+    /**
+     * 取得实例化的Retrofit
+     * 可以根据不同的需求获取不同的Retrofit实例
+     * @return
+     */
+    public IJokeInterface getIJokeInterface(){
+        if (jokeInterface == null) {
+            synchronized (monitor) {
+                if (jokeInterface == null) {
+                    //打印拦截器
+                    HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+                    logging.setLevel(GApplication.getInstance().isDebug()?HttpLoggingInterceptor.Level.BODY:HttpLoggingInterceptor.Level.NONE);
+                    // 公私密匙
+                    //MarvelSigningInterceptor signingInterceptor = new MarvelSigningInterceptor(KeyValue.MARVEL_PUBLIC_KEY, KeyValue.MARVEL_PRIVATE_KEY);
+                    OkHttpClient.Builder okHttpClient = new OkHttpClient.Builder();
+                    okHttpClient.addNetworkInterceptor(new HTTPInterceptor())
+                            .retryOnConnectionFailure(true)//设置出现错误进行重新连接。;
+                            //.addInterceptor(signingInterceptor)//加密处理
+                            .connectTimeout(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS)
+                            .readTimeout(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS)
+                            .addInterceptor(logging);
+
+                    jokeInterface = new Retrofit.Builder()
+                            .client(okHttpClient.build())
+                            .addConverterFactory(GsonConverterFactory.create())
+                            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                            .baseUrl("http://route.showapi.com/")
+                            .build().create(IJokeInterface.class);
+                }
+            }
+        }
+        return jokeInterface;
     }
     /**
      * 初始化通用的观察者

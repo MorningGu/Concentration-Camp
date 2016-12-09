@@ -45,12 +45,12 @@ public abstract class BaseFragment<V,T extends BasePresenter<V>> extends Fragmen
                 inflateView = inflater.inflate(getCreateViewLayoutId(), container, false);
 
             // 解决点击穿透问题
-            inflateView.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return true;
-                }
-            });
+//            inflateView.setOnTouchListener(new View.OnTouchListener() {
+//                @Override
+//                public boolean onTouch(View v, MotionEvent event) {
+//                    return true;
+//                }
+//            });
         }
         return inflateView;
     }

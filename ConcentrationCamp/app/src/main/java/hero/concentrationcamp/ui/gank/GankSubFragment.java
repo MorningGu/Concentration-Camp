@@ -85,9 +85,10 @@ public class GankSubFragment extends BaseFragment<GankSubFragment,GankSubFragmen
         mSwipeRefreshLayout.setRefreshing(false);
         if(isRefresh){
             pageNo=1;
+            mAdapter.setNewData(data);
         }else{
             pageNo++;
+            mAdapter.addData(data);
         }
-        mAdapter.addData(data);
     }
 }

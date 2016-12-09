@@ -17,6 +17,8 @@ public class Config {
             File.separator +"Cache";
     public static final String PHOTO_DIR = BASE_DIR +
             File.separator +"Photo";
+    public static final String YIYUAN_SIGN = "d62e0737e5d44d918dce0bc242b8fa92";
+    public static final int YIYUAN_APP_ID = 28589;
     public static final int CACHE_SIZE_DISK = 200*1024*1024;
     public static final int MEMORY_SIZE = (int) (Runtime.getRuntime().maxMemory()) / 4;  // 取1/4最大内存作为最大缓存
     public static final int IMAGE_SMALL = 200;

@@ -16,18 +16,18 @@ import hero.concentrationcamp.mvp.contract.GankContract;
 import hero.concentrationcamp.mvp.model.entity.SourceColumn;
 import hero.concentrationcamp.mvp.presenter.GankFragmentPresenter;
 import hero.concentrationcamp.ui.BaseFragment;
-import hero.concentrationcamp.ui.adapter.GankFragmentAdapter;
+import hero.concentrationcamp.ui.adapter.SubFragmentAdapter;
 
 /**
  * Created by hero on 2016/12/2 0002.
  */
 
-public class GankFragment extends BaseFragment<GankContract.IGankFragmentView,GankFragmentPresenter> implements GankContract.IGankFragmentView {
+public class GankFragment extends BaseFragment<GankFragment,GankFragmentPresenter> implements GankContract.IGankFragmentView {
     private TabLayout tabLayout;
     private Toolbar mToolbar;
     private ActionBarDrawerToggle mDrawerToggle;
     private ViewPager viewPager;
-    private GankFragmentAdapter adapter;
+    private SubFragmentAdapter adapter;
     private DrawerLayout mDrawerLayout;
     @Override
     public void findView(View view) {
@@ -48,6 +48,7 @@ public class GankFragment extends BaseFragment<GankContract.IGankFragmentView,Ga
      */
     private void initToolBar(){
         mToolbar.setTitle("干货集中营");//设置Toolbar标题
+        tabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setHomeButtonEnabled(true); //设置返回键可用
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -74,7 +75,7 @@ public class GankFragment extends BaseFragment<GankContract.IGankFragmentView,Ga
     @Override
     public void initPager(List<BaseFragment> fragments, SourceColumn[] columns) {
         viewPager.setOffscreenPageLimit(3);
-        adapter = new GankFragmentAdapter(getChildFragmentManager(), fragments,columns);
+        adapter = new SubFragmentAdapter(getChildFragmentManager(), fragments,columns);
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
     }

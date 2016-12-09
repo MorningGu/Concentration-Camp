@@ -24,7 +24,7 @@ import retrofit2.http.Url;
 /**
  * @Description:  集中營的网络请求接口
  */
-public interface ICampInterface {
+public interface IGankInterface {
 
     /**
      * 上传
