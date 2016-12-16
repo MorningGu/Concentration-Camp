@@ -1,13 +1,32 @@
 package hero.concentrationcamp.mvp.model.entity;
 
+import com.chad.library.adapter.base.entity.MultiItemEntity;
+import com.google.gson.annotations.SerializedName;
+
+import org.greenrobot.greendao.annotation.Convert;
+import org.greenrobot.greendao.annotation.Entity;
+import org.greenrobot.greendao.annotation.Id;
+
 import java.util.List;
+
+import hero.concentrationcamp.mvp.model.greendao.converter.ListStringConverter;
+import org.greenrobot.greendao.annotation.Generated;
+import org.greenrobot.greendao.annotation.Transient;
 
 /**
  * Created by hero on 2016/12/6 0006.
  */
+@Entity
+public class Gank implements MultiItemEntity {
+    @Transient
+    public static final int IMAGE = 0x01;
+    @Transient
+    public static final int NORMAL = 0x02;
 
-public class Gank {
-    private String _id; //"584186c7421aa939b58d31cd"
+    @Id(autoincrement = true)
+    private Long t_id;//本地数据库id
+    @SerializedName("_id")
+    private String s_id;//server id
     private String createdAt;//"2016-12-02T22:35:51.517Z"
     private String desc;//"美团：常见性能优化策略的总结"
     private String publishedAt;//"2016-12-05T11:40:51.351Z"
@@ -15,17 +34,35 @@ public class Gank {
     private String type;//"Android"
     private String who;//"solid"
     private String url;
+    @Convert(converter = ListStringConverter.class,columnType = String.class)
     private List<String> images;
     private boolean used;
+    //是否收藏
+    private boolean isCollected;
 
-    public String get_id() {
-        return _id;
+    @Generated(hash = 178726397)
+    public Gank(Long t_id, String s_id, String createdAt, String desc,
+            String publishedAt, String source, String type, String who, String url,
+            List<String> images, boolean used, boolean isCollected) {
+        this.t_id = t_id;
+        this.s_id = s_id;
+        this.createdAt = createdAt;
+        this.desc = desc;
+        this.publishedAt = publishedAt;
+        this.source = source;
+        this.type = type;
+        this.who = who;
+        this.url = url;
+        this.images = images;
+        this.used = used;
+        this.isCollected = isCollected;
     }
 
-    public void set_id(String _id) {
-        this._id = _id;
+    @Generated(hash = 116302247)
+    public Gank() {
     }
 
+    
     public String getCreatedAt() {
         return createdAt;
     }
@@ -96,5 +133,49 @@ public class Gank {
 
     public void setUsed(boolean used) {
         this.used = used;
+    }
+
+    public boolean getUsed() {
+        return this.used;
+    }
+
+    public boolean isCollected() {
+        return isCollected;
+    }
+
+    public void setCollected(boolean collected) {
+        isCollected = collected;
+    }
+
+    public boolean getIsCollected() {
+        return this.isCollected;
+    }
+
+    public void setIsCollected(boolean isCollected) {
+        this.isCollected = isCollected;
+    }
+
+    public Long getT_id() {
+        return t_id;
+    }
+
+    public void setT_id(Long t_id) {
+        this.t_id = t_id;
+    }
+
+    public String getS_id() {
+        return s_id;
+    }
+
+    public void setS_id(String s_id) {
+        this.s_id = s_id;
+    }
+
+    @Override
+    public int getItemType() {
+        if("福利".equals(type)){
+            return IMAGE;
+        }
+        return NORMAL;
     }
 }

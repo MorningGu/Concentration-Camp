@@ -12,8 +12,10 @@ import hero.concentrationcamp.mvp.model.entity.SourceColumn;
 public interface GankSubContract {
     interface IGankSubFragmentView{
         void updateData(boolean isRefresh, List<Gank> data);
+        void updateItemState(int position);
     }
     interface IGankSubFragmentPresenter{
         void getGankData(SourceColumn column,int pageNo,boolean isRefresh);
+        void setCollectState(int position,Gank gank);
     }
 }

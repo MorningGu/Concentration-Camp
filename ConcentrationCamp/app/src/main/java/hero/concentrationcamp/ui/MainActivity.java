@@ -1,5 +1,6 @@
 package hero.concentrationcamp.ui;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -8,9 +9,14 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.view.MenuItem;
 
+import com.umeng.socialize.UMShareAPI;
+
 import hero.concentrationcamp.R;
 import hero.concentrationcamp.mvp.contract.MainContract;
 import hero.concentrationcamp.mvp.presenter.MainActivityPresenter;
+import hero.concentrationcamp.ui.base.BaseActivity;
+import hero.concentrationcamp.ui.base.BaseFragment;
+import hero.concentrationcamp.ui.collection.CollectioinFragment;
 import hero.concentrationcamp.ui.gank.GankFragment;
 import hero.concentrationcamp.ui.joke.JokeFragment;
 import hero.concentrationcamp.utils.ToastUtils;
@@ -22,6 +28,7 @@ public class MainActivity extends BaseActivity<MainContract.IMainActivityView,Ma
     private BaseFragment mCurrentFragment;
     private GankFragment mGankFragment;
     private JokeFragment mJokeFragment;
+    private CollectioinFragment mCollectionFragment;
     private MenuItem mCurrentItem;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,8 +79,8 @@ public class MainActivity extends BaseActivity<MainContract.IMainActivityView,Ma
                         mCurrentFragment = mJokeFragment;
                         break;
                     case R.id.drawer_collect:
-//                        switchFragment(mAboutFragment);
-//                        mCurrentFragment = mAboutFragment;
+                        switchFragment(mCollectionFragment);
+                        mCurrentFragment = mCollectionFragment;
                         break;
                     case R.id.drawer_about:
 //                        switchFragment(mGrilFragment);
@@ -95,6 +102,8 @@ public class MainActivity extends BaseActivity<MainContract.IMainActivityView,Ma
         mGankFragment.setDrawerLayout(mDrawerLayout);
         mJokeFragment = new JokeFragment();
         mJokeFragment.setDrawerLayout(mDrawerLayout);
+        mCollectionFragment = new CollectioinFragment();
+        mCollectionFragment.setDrawerLayout(mDrawerLayout);
         mCurrentFragment = mGankFragment;
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.fl_main, mCurrentFragment)
@@ -111,6 +120,11 @@ public class MainActivity extends BaseActivity<MainContract.IMainActivityView,Ma
     @Override
     protected int getCreateViewLayoutId() {
         return R.layout.activity_main;
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        UMShareAPI.get(this).onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

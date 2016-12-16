@@ -1,66 +1,86 @@
 package hero.concentrationcamp.ui;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.FutureTarget;
-import com.bumptech.glide.request.target.Target;
 
-import java.io.File;
-import java.util.concurrent.ExecutionException;
+import com.umeng.socialize.UMShareAPI;
+import com.umeng.socialize.media.UMImage;
 
 import hero.concentrationcamp.R;
+import hero.concentrationcamp.fresco.ImageLoader;
+import hero.concentrationcamp.fresco.listener.LoadImageResult;
 import hero.concentrationcamp.mvp.BasePresenter;
+import hero.concentrationcamp.ui.base.BaseActivity;
+import hero.concentrationcamp.utils.LogUtils;
 import hero.concentrationcamp.utils.PixelUtil;
-import io.reactivex.BackpressureStrategy;
-import io.reactivex.Flowable;
-import io.reactivex.FlowableEmitter;
-import io.reactivex.FlowableOnSubscribe;
-import io.reactivex.android.schedulers.AndroidSchedulers;
+import hero.concentrationcamp.utils.UmengShare;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subscribers.ResourceSubscriber;
 
 public class ImageActivity extends BaseActivity {
     private CompositeDisposable mDisposables;
     private static final String HTML_BEGIN = "<html><body bgcolor='#000000'>";
-    private static final String HTML_MIDDLE = "<div style='width:100%;height:100%;display:table;'><span style='display:table-cell;vertical-align: middle;text-align:center;'><img src='file://";
+    private static final String HTML_MIDDLE = "<div style='width:100%;height:100%;display:table;'><span style='display:table-cell;vertical-align: middle;text-align:center;'><img src='file:";
     private static final String HTML_META_BEGIN = "<head><meta name='viewport' ";
     private static final String HTML_META_END = "'/></head>";
     private static final String HTML_END = "'></span></div></body></html>";
+    String url;
+    String text;
     WebView mWebView;
-
+    Button btn_share;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String url = getIntent().getStringExtra("url");
-        loadImage(url);
+        url = getIntent().getStringExtra("url");
+        text = getIntent().getStringExtra("text");
+        mWebView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                mWebView.getViewTreeObserver()
+                        .removeGlobalOnLayoutListener(this);
+                loadImage(url);
+            }
+        });
     }
 
     @Override
     public void findView() {
+        btn_share = (Button)findViewById(R.id.btn_share);
         //这里是为了使用application的context而不用activity的，因为可能会有泄露
         RelativeLayout layout_web = (RelativeLayout)findViewById(R.id.layout_web);
         mWebView = new WebView(getApplicationContext());
         mWebView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
         layout_web.addView(mWebView);
-//        mWebView = (WebView)findViewById(R.id.webView);
     }
 
     @Override
     public void initView() {
         initWebView();
+        btn_share.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                UMImage image = new UMImage(ImageActivity.this, url);//网络图片
+                new UmengShare().openShareBoard(ImageActivity.this,null,text,image);
+            }
+        });
     }
-
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        /** attention to this below ,must add this**/
+        UMShareAPI.get(this).onActivityResult(requestCode, resultCode, data);
+    }
     /**
      * 初始化webview
      */
@@ -86,82 +106,55 @@ public class ImageActivity extends BaseActivity {
      * @param url
      */
     private void loadImage(final String url){
-        Flowable<String> flowable = Flowable.create(new FlowableOnSubscribe<String>() {
+        ImageLoader.loadImageToReturnPath(this, url, new LoadImageResult() {
             @Override
-            public void subscribe(FlowableEmitter<String> e) throws Exception {
-                //下载图片
-                FutureTarget<File> futureTarget = Glide.with(getApplicationContext())
-                        .load(url)
-                        .downloadOnly(Target.SIZE_ORIGINAL,Target.SIZE_ORIGINAL);
-                String htmlURL = null;
-                try {
-                    File cache = futureTarget.get();
-                    String path = cache.getAbsolutePath();
-                    //获得图片宽高
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inJustDecodeBounds = true;
-                    BitmapFactory.decodeFile(path, options);
-                    float scale = 1;
-                    float width = options.outWidth;
-                    float height = options.outHeight;
-                    int viewWidth = mWebView.getWidth();
-                    int viewHeight = mWebView.getHeight();
-                    if(options.outWidth>options.outHeight) {//如果图片是横图
-                        //超过屏幕宽度并小于屏幕高度，则原比例居中显示
-                        if(options.outWidth>viewWidth && options.outHeight<=viewHeight){
-                            scale = 1;
-                        }
-                        //超过屏幕宽度并大于屏幕高度 将高度缩放到屏幕高度的大小，宽按同样比例缩小
-                        if(options.outWidth>viewWidth && options.outHeight>viewHeight){
-                            scale = (float) viewHeight/options.outHeight;
-                            height = viewHeight;
-                            width = (width*scale);
-                        }
-                        //不超过屏幕宽度，将宽度放大至屏幕宽度的大小，高按同样比例放大
-                        if(options.outWidth<viewWidth){
-                            scale = (float) viewWidth/options.outWidth;
-                            width = viewWidth;
-                            height = (height*scale);
-                        }
-                    } else {
-                        //如果图片是竖图
-                        scale = (float) viewWidth/width;
+            public void onResult(Bitmap bitmap) {
+
+            }
+
+            @Override
+            public void onResult(String path) {
+                if(isFinishing() || mWebView==null){
+                    return;
+                }
+                //获得图片宽高
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(path, options);
+                float scale = 1;
+                float width = options.outWidth;
+                float height = options.outHeight;
+                int viewWidth = mWebView.getWidth();
+                int viewHeight = mWebView.getHeight();
+                if(options.outWidth>options.outHeight) {//如果图片是横图
+                    //超过屏幕宽度并小于屏幕高度，则原比例居中显示
+                    if(options.outWidth>viewWidth && options.outHeight<=viewHeight){
+                        scale = 1;
+                    }
+                    //超过屏幕宽度并大于屏幕高度 将高度缩放到屏幕高度的大小，宽按同样比例缩小
+                    if(options.outWidth>viewWidth && options.outHeight>viewHeight){
+                        scale = (float) viewHeight/options.outHeight;
+                        height = viewHeight;
+                        width = (width*scale);
+                    }
+                    //不超过屏幕宽度，将宽度放大至屏幕宽度的大小，高按同样比例放大
+                    if(options.outWidth<viewWidth){
+                        scale = (float) viewWidth/options.outWidth;
                         width = viewWidth;
                         height = (height*scale);
                     }
-                    //最后按比例减去10（自己估计的值），是因为如果不减掉，会出现加载的图略大一些的情况
+                } else {
+                    //如果图片是竖图
+                    scale = (float) viewWidth/width;
+                    width = viewWidth;
+                    height = (height*scale);
+                }
+                //最后按比例减去10（自己估计的值），是因为如果不减掉，会出现加载的图略大一些的情况
 //                    htmlURL = getHtmlCharsByDefault(path, (int)(PixelUtil.px2dp(width)-(10*scale)), (int)(PixelUtil.px2dp(height)-(10*scale)));
-                    htmlURL = getHtmlChars(path, (int)(PixelUtil.px2dp(width)-(10*scale)), (int)(PixelUtil.px2dp(height)-(10*scale)));
-                } catch (InterruptedException exception) {
-                    exception.printStackTrace();
-                } catch (ExecutionException exception) {
-                    exception.printStackTrace();
-                }
-                e.onNext(htmlURL);
-                e.onComplete();
+                String htmlURL = getHtmlChars(path, (int)(PixelUtil.px2dp(width)-(10*scale)), (int)(PixelUtil.px2dp(height)-(10*scale)));
+                mWebView.loadDataWithBaseURL("", htmlURL, "text/html", null, null);
             }
-        }, BackpressureStrategy.DROP);
-        ResourceSubscriber subscriber = new ResourceSubscriber<String>(){
-            @Override
-            public void onNext(String s) {
-                if(!TextUtils.isEmpty(s)){
-                    mWebView.loadDataWithBaseURL("", s, "text/html", null, null);
-                }
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                dispose();
-            }
-
-            @Override
-            public void onComplete() {
-                dispose();
-            }
-        };
-        addSubscription(flowable.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(subscriber));
+        });
     }
 
     /**
@@ -171,7 +164,7 @@ public class ImageActivity extends BaseActivity {
      * @param height
      * @return
      */
-    private String getHtmlCharsByDefault(String url, int width,int height) {
+    private String getHtmlCharsDefault(String url, int width,int height) {
         return HTML_BEGIN + HTML_MIDDLE + url + "' width='" + width +"' height='"+height+"'"+ HTML_END;
     }
 
@@ -184,7 +177,7 @@ public class ImageActivity extends BaseActivity {
      */
     private String getHtmlChars(String url, int width, int height) {
         return HTML_BEGIN + HTML_META_BEGIN + "content='minimum-scale="
-                + 1.0 + HTML_META_END + HTML_MIDDLE + url + "' width='"+width+"' height='" + height + HTML_END;
+                + 1.0 + HTML_META_END + HTML_MIDDLE + url + "' width='"+width+ HTML_END;
     }
     @Override
     protected BasePresenter createPresenter() {

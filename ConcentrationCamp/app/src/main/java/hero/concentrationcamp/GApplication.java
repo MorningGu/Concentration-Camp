@@ -4,15 +4,14 @@ import android.app.Application;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.integration.okhttp3.OkHttpUrlLoader;
-import com.bumptech.glide.load.model.GlideUrl;
+import com.facebook.drawee.backends.pipeline.Fresco;
 import com.squareup.leakcanary.LeakCanary;
+import com.umeng.socialize.PlatformConfig;
+import com.umeng.socialize.UMShareAPI;
 
-import java.io.InputStream;
-
+import hero.concentrationcamp.fresco.config.ImageLoaderConfig;
+import hero.concentrationcamp.mvp.model.greendao.GreenDaoHelper;
 import hero.concentrationcamp.utils.LogUtils;
-import okhttp3.OkHttpClient;
 
 
 /**
@@ -22,7 +21,7 @@ public class GApplication extends Application {
 
     private static GApplication sInstance; //s的前缀，表示static m的前缀表示member
 
-    private boolean isDebug = true;
+    private boolean isDebug = false;
 
     public void onCreate() {
         super.onCreate();
@@ -30,18 +29,22 @@ public class GApplication extends Application {
     }
     private void init(){
         sInstance = this;
+        initUMShare();
         initLeakCanary();
         initDebug();
-        initGlide();
-
-        //// FIXME: 2016/8/29 0029  当网络请求出错时会崩溃，之前测试404必崩 后来好了，原因不明
-//        RxJavaPlugins.getInstance().registerErrorHandler(new RxJavaErrorHandler() {
-//            @Override
-//            public void handleError(Throwable e) {
-//                LogUtils.e("rxJava Error",e.getMessage());
-//            }
-//        });
+        initFresco();
+        GreenDaoHelper.initDatabase();
     }
+    /**
+     * 友盟分享 初始化
+     */
+    private void initUMShare(){
+        UMShareAPI.get(this);
+        PlatformConfig.setWeixin("wxac488e4c6ab1640e", "5bc3b0a8121dd0a18df8d5ad14739658");
+        PlatformConfig.setSinaWeibo("1325446430", "fd5a4f00412f9e66ddc4f25f68f11867");
+        PlatformConfig.setQQZone("1104842168", "Is67JxDKFPCzUKgw");
+    }
+
     private void initLeakCanary(){
         //内存分析工具的初始化 针对1.5版本
         if (LeakCanary.isInAnalyzerProcess(this)) {
@@ -51,22 +54,22 @@ public class GApplication extends Application {
         }
         LeakCanary.install(this);
     }
-    private void initGlide(){
-        Glide.get(this).register(GlideUrl.class,InputStream.class,new OkHttpUrlLoader.Factory(new OkHttpClient()));
+    private void initFresco(){
+        Fresco.initialize(this, ImageLoaderConfig.getImagePipelineConfig(this));
     }
     /**
      * 初始化是否是debug
      */
     private void initDebug(){
         ApplicationInfo appInfo = null;
-//        try {
-//            appInfo = GApplication.getInstance().getPackageManager()
-//                    .getApplicationInfo(GApplication.getInstance().getPackageName(),
-//                            PackageManager.GET_META_DATA);
-//            isDebug =  appInfo.metaData.getBoolean("IS_DEBUG");
-//        } catch (PackageManager.NameNotFoundException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            appInfo = GApplication.getInstance().getPackageManager()
+                    .getApplicationInfo(GApplication.getInstance().getPackageName(),
+                            PackageManager.GET_META_DATA);
+            isDebug =  appInfo.metaData.getBoolean("IS_DEBUG");
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
         LogUtils.isDebug(isDebug);
     }
 

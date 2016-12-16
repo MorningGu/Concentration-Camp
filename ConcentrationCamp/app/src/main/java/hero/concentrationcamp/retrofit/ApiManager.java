@@ -8,12 +8,17 @@ import org.reactivestreams.Subscription;
 import java.util.concurrent.TimeUnit;
 
 import hero.concentrationcamp.GApplication;
+import hero.concentrationcamp.mvp.model.entity.Gank;
+import hero.concentrationcamp.mvp.model.entity.GankDao;
+import hero.concentrationcamp.mvp.model.entity.GankVo;
+import hero.concentrationcamp.mvp.model.greendao.GreenDaoHelper;
 import hero.concentrationcamp.utils.LogUtils;
 import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.LongConsumer;
+import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subscribers.ResourceSubscriber;
 import okhttp3.OkHttpClient;
@@ -33,7 +38,7 @@ public enum ApiManager {
     /**
      * 这一部分配置常量，可以抽取出常量类
      */
-    private static final long DEFAULT_TIMEOUT = 10000;//默认超时时间(毫秒)
+    private static final long DEFAULT_TIMEOUT = 20000;//默认超时时间(毫秒)
 
     /**
      * 取得实例化的Retrofit
@@ -107,23 +112,23 @@ public enum ApiManager {
      */
     public ResourceSubscriber startObservable(Flowable observable, ResourceSubscriber subscriber) {
        return (ResourceSubscriber)observable.subscribeOn(Schedulers.io())
-               .observeOn(AndroidSchedulers.mainThread())
-               .doOnLifecycle(new Consumer<Subscription>() {
+               .filter(new Predicate() {
                    @Override
-                   public void accept(Subscription subscription) throws Exception {
-                       LogUtils.d("doOnLifecycle","OnSubscribe");
-                   }
-               }, new LongConsumer() {
-                   @Override
-                   public void accept(long t) throws Exception {
-                       LogUtils.d("doOnLifecycle","OnRequest");
-                   }
-               }, new Action() {
-                   @Override
-                   public void run() throws Exception {
-                       LogUtils.d("doOnLifecycle","OnCancel");
+                   public boolean test(Object o) throws Exception {
+                        if(o instanceof GankVo){
+                            for(Gank gank:((GankVo)o).getResults()){
+                                //对每条数据做本地是否收藏的查询，并赋值
+                                Gank temp = GreenDaoHelper.getDaoSession().getGankDao().queryBuilder()
+                                        .where(GankDao.Properties.S_id.eq(gank.getS_id())).unique();
+                                if(temp!=null){
+                                    gank.setCollected(temp.isCollected());
+                                }
+                            }
+                        }
+                       return true;
                    }
                })
+               .observeOn(AndroidSchedulers.mainThread())
                .subscribeWith(subscriber);
     }
 }

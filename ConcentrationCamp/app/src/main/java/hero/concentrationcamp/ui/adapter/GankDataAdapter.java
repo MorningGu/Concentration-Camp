@@ -2,19 +2,19 @@ package hero.concentrationcamp.ui.adapter;
 
 import android.content.Intent;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ImageView;
+import android.widget.Button;
 
-import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
+import com.facebook.drawee.view.SimpleDraweeView;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
+import hero.concentrationcamp.GConfig;
 import hero.concentrationcamp.R;
+import hero.concentrationcamp.fresco.ImageLoader;
 import hero.concentrationcamp.mvp.model.entity.Gank;
-import hero.concentrationcamp.mvp.model.entity.SourceColumn;
+import hero.concentrationcamp.ui.ImageActivity;
 import hero.concentrationcamp.ui.WebActivity;
 import hero.concentrationcamp.utils.TimeUtils;
 
@@ -23,10 +23,8 @@ import hero.concentrationcamp.utils.TimeUtils;
  */
 
 public class GankDataAdapter extends BaseQuickAdapter<Gank> {
-    SourceColumn column;
-    public GankDataAdapter(SourceColumn column,List data) {
+    public GankDataAdapter(List data) {
         super(R.layout.item_gank,data);
-        this.column = column;
     }
 
     @Override
@@ -34,36 +32,45 @@ public class GankDataAdapter extends BaseQuickAdapter<Gank> {
         String time = item.getPublishedAt();
         helper.setText(R.id.tv_time, TimeUtils.parseTzTime(time))
                 .setText(R.id.tv_creator, item.getWho())
-                .setText(R.id.tv_desc, item.getDesc());
-
-      if(column.getCode().equals("福利")){
-          //福利的图片是在url中的
-          Glide.with(mContext).load(item.getUrl()+"?imageView2/0/w/300").placeholder(R.mipmap.ic_launcher).into((ImageView) helper.getView(R.id.iv_image));
-          helper.itemView.setOnClickListener(new View.OnClickListener() {
-              @Override
-              public void onClick(View view) {
-                  //福利，点击查看大图
-              }
-          });
-      }else{
-          List<String> images = item.getImages();
-          if(images!=null && images.size()>0){
-              //有图就展示网络图
-              Glide.with(mContext).load(images.get(0)+"?imageView2/0/w/300").placeholder(R.mipmap.ic_launcher).into((ImageView) helper.getView(R.id.iv_image));
-          }else{
-              //展示占位图
-              Glide.with(mContext).load(R.mipmap.ic_launcher).into((ImageView) helper.getView(R.id.iv_image));
-          }
-          helper.itemView.setOnClickListener(new View.OnClickListener() {
-              @Override
-              public void onClick(View view) {
-                  //点击跳转webview 浏览网页详情
-                  Intent intent = new Intent(mContext, WebActivity.class);
-                  intent.putExtra("url",item.getUrl());
-                  intent.putExtra("title",item.getDesc());
-                  mContext.startActivity(intent);
-              }
-          });
-      }
+                .setText(R.id.tv_desc, item.getDesc())
+                .addOnClickListener(R.id.btn_share)
+                .addOnClickListener(R.id.btn_collect);
+        //收藏状态
+        if(item.isCollected()){
+            ((Button)helper.getView(R.id.btn_collect)).setText("取消收藏");
+        }else{
+            ((Button)helper.getView(R.id.btn_collect)).setText("收藏");
+        }
+        if("福利".equals(item.getType())){
+            //福利的图片是在url中的
+            ImageLoader.loadImage((SimpleDraweeView)helper.getView(R.id.iv_image),item.getUrl()+"?imageView2/0/w/300", GConfig.IMAGE_SMALL, GConfig.IMAGE_SMALL);
+            helper.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(mContext, ImageActivity.class);
+                    intent.putExtra("url",item.getUrl());
+                    intent.putExtra("text",item.getDesc());
+                    mContext.startActivity(intent);
+                }
+            });
+        }else{
+            List<String> images = item.getImages();
+            if(images!=null && images.size()>0){
+                //有图就展示网络图
+                ImageLoader.loadImage((SimpleDraweeView)helper.getView(R.id.iv_image),images.get(0)+"?imageView2/0/w/300", GConfig.IMAGE_SMALL, GConfig.IMAGE_SMALL);
+            }else{
+                //展示占位图
+                ImageLoader.loadDrawable((SimpleDraweeView)helper.getView(R.id.iv_image),R.mipmap.ic_launcher);
+            }
+            helper.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(mContext, WebActivity.class);
+                    intent.putExtra("url", item.getUrl());
+                    intent.putExtra("text", item.getDesc());
+                    mContext.startActivity(intent);
+                }
+            });
+        }
     }
 }

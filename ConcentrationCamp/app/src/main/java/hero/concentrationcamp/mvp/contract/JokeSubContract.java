@@ -12,8 +12,10 @@ import hero.concentrationcamp.mvp.model.entity.SourceColumn;
 public interface JokeSubContract {
     interface IJokeSubFragmentView{
         void updateData(boolean isRefresh, List<Joke> data);
+        void updateItemState(int position);
     }
     interface IJokeSubFragmentPresenter{
         void getJokeData(String type,int pageNo,boolean isRefresh);
+        void setCollectState(int position,Joke joke);
     }
 }

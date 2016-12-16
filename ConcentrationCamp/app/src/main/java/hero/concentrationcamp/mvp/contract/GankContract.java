@@ -1,9 +1,11 @@
 package hero.concentrationcamp.mvp.contract;
 
+import android.support.v4.widget.DrawerLayout;
+
 import java.util.List;
 
 import hero.concentrationcamp.mvp.model.entity.SourceColumn;
-import hero.concentrationcamp.ui.BaseFragment;
+import hero.concentrationcamp.ui.base.BaseFragment;
 
 /**
  * Created by hero on 2016/12/2 0002.
@@ -17,11 +19,16 @@ public interface GankContract {
          * @param columns
          */
         void initPager(List<BaseFragment> fragments, SourceColumn[] columns);
+        void initToolBar();
+        void initDrawerToggle();
+        void setDrawerLayout(DrawerLayout drawerLayout);
     }
     interface IGankFragmetnPresenter{
         /**
          * 初始化一些
          */
-        void start();
+        void startGank();
+        void startJoke();
+        void startCollection();
     }
 }

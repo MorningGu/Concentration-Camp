@@ -15,14 +15,14 @@ import hero.concentrationcamp.R;
 import hero.concentrationcamp.mvp.contract.GankContract;
 import hero.concentrationcamp.mvp.model.entity.SourceColumn;
 import hero.concentrationcamp.mvp.presenter.GankFragmentPresenter;
-import hero.concentrationcamp.ui.BaseFragment;
+import hero.concentrationcamp.ui.base.BaseFragment;
 import hero.concentrationcamp.ui.adapter.SubFragmentAdapter;
 
 /**
  * Created by hero on 2016/12/2 0002.
  */
 
-public class GankFragment extends BaseFragment<GankFragment,GankFragmentPresenter> implements GankContract.IGankFragmentView {
+public class GankFragment extends BaseFragment<GankContract.IGankFragmentView,GankFragmentPresenter> implements GankContract.IGankFragmentView {
     private TabLayout tabLayout;
     private Toolbar mToolbar;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -40,13 +40,13 @@ public class GankFragment extends BaseFragment<GankFragment,GankFragmentPresente
     public void initView(Bundle savedInstanceState) {
         initToolBar();
         initDrawerToggle();
-        mPresenter.start();
+        mPresenter.startGank();
     }
 
     /**
      * 初始化toolbar
      */
-    private void initToolBar(){
+    public void initToolBar(){
         mToolbar.setTitle("干货集中营");//设置Toolbar标题
         tabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
@@ -56,7 +56,7 @@ public class GankFragment extends BaseFragment<GankFragment,GankFragmentPresente
     /**
      * 初始化toolbar中的返回键
      */
-    private void initDrawerToggle(){
+    public void initDrawerToggle(){
         //创建返回键，并实现打开关/闭监听
         mDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, mToolbar, R.string.open, R.string.close);
         mDrawerToggle.syncState();

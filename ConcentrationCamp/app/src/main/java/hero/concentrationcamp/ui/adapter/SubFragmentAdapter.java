@@ -7,7 +7,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import java.util.List;
 
 import hero.concentrationcamp.mvp.model.entity.SourceColumn;
-import hero.concentrationcamp.ui.BaseFragment;
+import hero.concentrationcamp.ui.base.BaseFragment;
 
 /**
  * Created by hero on 2016/12/2 0002.

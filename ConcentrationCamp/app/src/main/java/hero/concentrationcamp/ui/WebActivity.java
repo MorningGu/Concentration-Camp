@@ -11,16 +11,20 @@ import android.webkit.WebViewClient;
 
 import hero.concentrationcamp.R;
 import hero.concentrationcamp.mvp.BasePresenter;
+import hero.concentrationcamp.ui.base.BaseActivity;
 import hero.concentrationcamp.utils.ToastUtils;
+import hero.concentrationcamp.utils.UmengShare;
 
 public class WebActivity extends BaseActivity {
     WebView mWebView;
     Toolbar mToolbar;
+    String url;
+    String title;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String url = getIntent().getStringExtra("url");
-        String title = getIntent().getStringExtra("title");
+        url = getIntent().getStringExtra("url");
+        title = getIntent().getStringExtra("title");
         mWebView.loadUrl(url);
         initToolBar(title);
     }
@@ -63,7 +67,7 @@ public class WebActivity extends BaseActivity {
                 ToastUtils.showToast("收藏了");
                 break;
             case R.id.action_share:
-                ToastUtils.showToast("分享了");
+                new UmengShare().openShareBoard(this,null,title,url,null);
                 break;
         }
         return true;

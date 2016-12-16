@@ -22,14 +22,14 @@ public class ToastUtils {
         if(TextUtils.isEmpty(text)){
             return;
         }
-//        Toast.makeText(context, text, duration).show();
         if(mToast == null){
             mToast = Toast.makeText(context, text, duration);
         }else{
+            //加上时间的设置才能保证时间不叠加
             mToast.setDuration(duration);
             mToast.setText(text);
         }
-        mToast.show();
+//        mToast.show();
     }
 
     public static void showToast (Context context, int strId, int duration) {
