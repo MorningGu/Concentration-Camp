@@ -476,7 +476,7 @@ public class ImageLoader {
         ImageRequestBuilder builder = ImageRequestBuilder.newBuilderWithSource(uri);
         ImageRequest imageRequest = builder.build();
         // 获取已解码的图片，返回的是Bitmap
-        DataSource<CloseableReference<CloseableImage>> dataSource = imagePipeline.fetchDecodedImage(imageRequest, context);
+        final DataSource<CloseableReference<CloseableImage>> source = imagePipeline.fetchDecodedImage(imageRequest, context);
         DataSubscriber dataSubscriber = new BaseDataSubscriber<CloseableReference<CloseableBitmap>>() {
             @Override
             public void onNewResultImpl(DataSource<CloseableReference<CloseableBitmap>> dataSource) {
@@ -500,6 +500,8 @@ public class ImageLoader {
                         closeableReference.close();
                     }
                 }
+                dataSource.close();
+                source.close();
             }
 
             @Override
@@ -510,7 +512,7 @@ public class ImageLoader {
                 }
             }
         };
-        dataSource.subscribe(dataSubscriber, executor);
+        source.subscribe(dataSubscriber, executor);
     }
 
     /**
@@ -532,8 +534,8 @@ public class ImageLoader {
         ImageRequest imageRequest = builder.build();
 
         // 获取未解码的图片数据
-        DataSource<CloseableReference<PooledByteBuffer>> dataSource = imagePipeline.fetchEncodedImage(imageRequest, context);
-        dataSource.subscribe(new BaseDataSubscriber<CloseableReference<PooledByteBuffer>>() {
+        final DataSource<CloseableReference<PooledByteBuffer>> source = imagePipeline.fetchEncodedImage(imageRequest, context);
+        source.subscribe(new BaseDataSubscriber<CloseableReference<PooledByteBuffer>>() {
             @Override
             public void onNewResultImpl(DataSource<CloseableReference<PooledByteBuffer>> dataSource) {
                 if (!dataSource.isFinished() || loadFileResult == null) {
@@ -560,6 +562,8 @@ public class ImageLoader {
                         closeableReference.close();
                     }
                 }
+                dataSource.close();
+                source.close();
             }
 
             @Override
@@ -589,7 +593,7 @@ public class ImageLoader {
                 .build();
 
         // 获取已解码的图片，返回的是Bitmap
-        DataSource<CloseableReference<CloseableImage>> dataSource = imagePipeline.fetchDecodedImage(imageRequest, context);
+        final DataSource<CloseableReference<CloseableImage>> source = imagePipeline.fetchDecodedImage(imageRequest, context);
         DataSubscriber dataSubscriber = new BaseDataSubscriber<CloseableReference<CloseableBitmap>>() {
             @Override
             public void onNewResultImpl(DataSource<CloseableReference<CloseableBitmap>> dataSource) {
@@ -612,6 +616,8 @@ public class ImageLoader {
                         closeableReference.close();
                     }
                 }
+                dataSource.close();
+                source.close();
             }
 
             @Override
@@ -622,7 +628,7 @@ public class ImageLoader {
                 }
             }
         };
-        dataSource.subscribe(dataSubscriber, UiThreadImmediateExecutorService.getInstance());
+        source.subscribe(dataSubscriber, UiThreadImmediateExecutorService.getInstance());
     }
 
     /**
@@ -643,21 +649,33 @@ public class ImageLoader {
                 .build();
 
         // 获取已解码的图片，返回的是Bitmap
-        DataSource<CloseableReference<CloseableImage>> dataSource = imagePipeline.fetchDecodedImage(imageRequest, context);
+        final DataSource<CloseableReference<CloseableImage>> source = imagePipeline.fetchDecodedImage(imageRequest, context);
+
         DataSubscriber dataSubscriber = new BaseDataSubscriber<CloseableReference<CloseableBitmap>>() {
             @Override
             public void onNewResultImpl(DataSource<CloseableReference<CloseableBitmap>> dataSource) {
                 if (!dataSource.isFinished()) {
                     return;
                 }
-                ImageRequestBuilder.newBuilderWithSource(Uri.parse(url)).build();
+                CloseableReference<CloseableBitmap> imageReference = dataSource.getResult();
+                if (imageReference != null) {
+                    final CloseableReference<CloseableBitmap> closeableReference = imageReference.clone();
+                    try {
+                        ImageRequestBuilder.newBuilderWithSource(Uri.parse(url)).build();
 
-                CacheKey cacheKey= DefaultCacheKeyFactory.getInstance()
-                        .getEncodedCacheKey(imageRequest,context);
-                BinaryResource resource = ImagePipelineFactory.getInstance()
-                        .getMainDiskStorageCache().getResource(cacheKey);
-                File file=((FileBinaryResource)resource).getFile();
-                loadImageResult.onResult(file.getAbsolutePath());
+                        CacheKey cacheKey= DefaultCacheKeyFactory.getInstance()
+                                .getEncodedCacheKey(imageRequest,null);
+                        BinaryResource resource = ImagePipelineFactory.getInstance()
+                                .getMainFileCache().getResource(cacheKey);
+                        File file=((FileBinaryResource)resource).getFile();
+                        loadImageResult.onResult(file.getAbsolutePath());
+                    } finally {
+                        imageReference.close();
+                        closeableReference.close();
+                    }
+                }
+                dataSource.close();
+                source.close();
             }
 
             @Override
@@ -668,7 +686,7 @@ public class ImageLoader {
                 }
             }
         };
-        dataSource.subscribe(dataSubscriber, UiThreadImmediateExecutorService.getInstance());
+        source.subscribe(dataSubscriber, UiThreadImmediateExecutorService.getInstance());
     }
 
 }
