@@ -7,9 +7,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 
@@ -19,16 +21,13 @@ import com.umeng.socialize.media.UMImage;
 import hero.concentrationcamp.R;
 import hero.concentrationcamp.fresco.ImageLoader;
 import hero.concentrationcamp.fresco.listener.LoadImageResult;
+import hero.concentrationcamp.fresco.progressbar.CircleProgress;
 import hero.concentrationcamp.mvp.BasePresenter;
 import hero.concentrationcamp.ui.base.BaseActivity;
-import hero.concentrationcamp.utils.LogUtils;
 import hero.concentrationcamp.utils.PixelUtil;
 import hero.concentrationcamp.utils.UmengShare;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 
 public class ImageActivity extends BaseActivity {
-    private CompositeDisposable mDisposables;
     private static final String HTML_BEGIN = "<html><body bgcolor='#000000'>";
     private static final String HTML_MIDDLE = "<div style='width:100%;height:100%;display:table;'><span style='display:table-cell;vertical-align: middle;text-align:center;'><img src='file:";
     private static final String HTML_META_BEGIN = "<head><meta name='viewport' ";
@@ -38,6 +37,8 @@ public class ImageActivity extends BaseActivity {
     String text;
     WebView mWebView;
     Button btn_share;
+    ImageView iv_loading;
+    CircleProgress loading;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +49,7 @@ public class ImageActivity extends BaseActivity {
             public void onGlobalLayout() {
                 mWebView.getViewTreeObserver()
                         .removeGlobalOnLayoutListener(this);
+                //WebView加载完毕后才开始加载图片
                 loadImage(url);
             }
         });
@@ -58,6 +60,7 @@ public class ImageActivity extends BaseActivity {
         btn_share = (Button)findViewById(R.id.btn_share);
         //这里是为了使用application的context而不用activity的，因为可能会有泄露
         RelativeLayout layout_web = (RelativeLayout)findViewById(R.id.layout_web);
+        iv_loading = (ImageView)findViewById(R.id.iv_loading);
         mWebView = new WebView(getApplicationContext());
         mWebView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
@@ -67,6 +70,10 @@ public class ImageActivity extends BaseActivity {
     @Override
     public void initView() {
         initWebView();
+        loading = new CircleProgress.Builder().build();
+        loading.initProperty();
+        loading.inject(iv_loading);
+        loading.setMaxValue(100);
         btn_share.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -99,6 +106,17 @@ public class ImageActivity extends BaseActivity {
             }
         });
         mWebView.setBackgroundColor(0x00000000);//xml中设置背景无效，去掉有白底
+        mWebView.setWebChromeClient(new WebChromeClient(){
+            @Override
+            public void onProgressChanged(WebView view, int newProgress) {
+                super.onProgressChanged(view, newProgress);
+                if (newProgress == 100) {
+                    iv_loading.setVisibility(View.GONE);
+                }
+            }
+
+
+        });
     }
 
     /**
@@ -110,6 +128,15 @@ public class ImageActivity extends BaseActivity {
             @Override
             public void onResult(Bitmap bitmap) {
 
+            }
+
+            @Override
+            public void onProgress(final float progress) {
+                //进度显示
+                if(iv_loading.getVisibility()==View.GONE){
+                    iv_loading.setVisibility(View.VISIBLE);
+                }
+                loading.setLevel((int)(progress*100));
             }
 
             @Override
@@ -155,6 +182,7 @@ public class ImageActivity extends BaseActivity {
                 mWebView.loadDataWithBaseURL("", htmlURL, "text/html", null, null);
             }
         });
+        iv_loading.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -192,7 +220,6 @@ public class ImageActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
-        dispose();
         clearWebViewResource();
         super.onDestroy();
     }
@@ -213,19 +240,5 @@ public class ImageActivity extends BaseActivity {
             mWebView.destroy();
             mWebView = null;
         }
-    }
-    //取消所有的订阅
-    public void dispose(){
-        if(mDisposables!=null){
-            mDisposables.clear();
-        }
-    }
-    //rxjava 订阅
-    protected void addSubscription(Disposable disposable) {
-        if (disposable == null) return;
-        if (mDisposables == null) {
-            mDisposables = new CompositeDisposable();
-        }
-        mDisposables.add(disposable);
     }
 }

@@ -58,7 +58,7 @@ public class GankSubFragment extends BaseFragment<GankSubContract.IGankSubFragme
         //设置刷新时动画的颜色，可以设置4个
         // 顶部刷新的样式
         mSwipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_light, android.R.color.holo_red_light, android.R.color.holo_orange_light, android.R.color.holo_green_light);
-        mAdapter = new MultiGankAdapter(((BaseActivity)getActivity()).mScreenWidth,null);
+        mAdapter = new MultiGankAdapter(((BaseActivity)getActivity()).mScreenWidth,null,mPresenter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(layoutManager);
@@ -74,44 +74,46 @@ public class GankSubFragment extends BaseFragment<GankSubContract.IGankSubFragme
                 mPresenter.getGankData(mColumn,pageNo+1,false);
             }
         });
-        mRecyclerView.addOnItemTouchListener(new OnItemClickListener() {
-            @Override
-            public void SimpleOnItemClick(BaseQuickAdapter adapter, View view, int position) {}
-
-            @Override
-            public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
-                super.onItemChildClick(adapter, view, position);
-                switch (view.getId()) {
-                    case R.id.btn_share:{
-                        if("福利".equals(((Gank)adapter.getData().get(position)).getType())){
-                            UMImage image = new UMImage(getActivity(), ((Gank)adapter.getData().get(position)).getUrl());//网络图片
-                            new UmengShare().openShareBoard(getActivity(),null
-                                    , ((Gank)adapter.getData().get(position)).getDesc()
-                                    , ((Gank)adapter.getData().get(position)).getUrl()
-                                    ,image);
-                        }else{
-                            if(((Gank)adapter.getData().get(position)).getImages()!=null
-                                    && ((Gank)adapter.getData().get(position)).getImages().size()>0){
-                                UMImage image = new UMImage(getActivity(), ((Gank)adapter.getData().get(position)).getImages().get(0));//网络图片
-                                new UmengShare().openShareBoard(getActivity(),null
-                                        , ((Gank)adapter.getData().get(position)).getDesc()
-                                        , ((Gank)adapter.getData().get(position)).getUrl()
-                                        ,image);
-                            }else{
-                                new UmengShare().openShareBoard(getActivity(),null
-                                        , ((Gank)adapter.getData().get(position)).getDesc()
-                                        , ((Gank)adapter.getData().get(position)).getUrl(),null);
-                            }
-
-                        }
-                        break;
-                    }
-                    case R.id.btn_collect:{
-                        mPresenter.setCollectState(position,((Gank)adapter.getData().get(position)));
-                    }
-                }
-            }
-        });
+//        mRecyclerView.addOnItemTouchListener(new OnItemClickListener() {
+//            @Override
+//            public void SimpleOnItemClick(BaseQuickAdapter adapter, View view, int position) {}
+//
+//            @Override
+//            public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
+//                switch (view.getId()) {
+//                    case R.id.btn_share:{
+//                        if("福利".equals(((Gank)adapter.getData().get(position)).getType())){
+//                            UMImage image = new UMImage(getActivity(), ((Gank)adapter.getData().get(position)).getUrl());//网络图片
+//                            new UmengShare().openShareBoard(getActivity(),null
+//                                    , ((Gank)adapter.getData().get(position)).getDesc()
+//                                    , ((Gank)adapter.getData().get(position)).getUrl()
+//                                    ,image);
+//                        }else{
+//                            if(((Gank)adapter.getData().get(position)).getImages()!=null
+//                                    && ((Gank)adapter.getData().get(position)).getImages().size()>0){
+//                                UMImage image = new UMImage(getActivity(), ((Gank)adapter.getData().get(position)).getImages().get(0));//网络图片
+//                                new UmengShare().openShareBoard(getActivity(),null
+//                                        , ((Gank)adapter.getData().get(position)).getDesc()
+//                                        , ((Gank)adapter.getData().get(position)).getUrl()
+//                                        ,image);
+//                            }else{
+//                                new UmengShare().openShareBoard(getActivity(),null
+//                                        , ((Gank)adapter.getData().get(position)).getDesc()
+//                                        , ((Gank)adapter.getData().get(position)).getUrl(),null);
+//                            }
+//
+//                        }
+//                        break;
+//                    }
+//                    case R.id.btn_collect:{
+//                        mPresenter.setCollectState(position,((Gank)adapter.getData().get(position)));
+//                        break;
+//                    }
+//                    default:
+//                        break;
+//                }
+//            }
+//        });
         mPresenter.getGankData(mColumn,1,true);
     }
 

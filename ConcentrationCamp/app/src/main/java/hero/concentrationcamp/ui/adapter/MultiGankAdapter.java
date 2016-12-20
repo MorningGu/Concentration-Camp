@@ -1,12 +1,14 @@
 package hero.concentrationcamp.ui.adapter;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.view.View;
-import android.widget.Button;
+import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseMultiItemQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.facebook.drawee.view.SimpleDraweeView;
+import com.umeng.socialize.media.UMImage;
 
 import java.util.List;
 
@@ -16,10 +18,12 @@ import hero.concentrationcamp.fresco.ImageLoader;
 import hero.concentrationcamp.fresco.listener.ResizeControllerByWidth;
 import hero.concentrationcamp.fresco.progressbar.CircleProgress;
 import hero.concentrationcamp.mvp.model.entity.Gank;
+import hero.concentrationcamp.mvp.presenter.GankSubFragmentPresenter;
 import hero.concentrationcamp.ui.ImageActivity;
 import hero.concentrationcamp.ui.WebActivity;
 import hero.concentrationcamp.utils.PixelUtil;
 import hero.concentrationcamp.utils.TimeUtils;
+import hero.concentrationcamp.utils.UmengShare;
 
 /**
  * Created by hero on 2016/12/16 0016.
@@ -27,26 +31,60 @@ import hero.concentrationcamp.utils.TimeUtils;
 
 public class MultiGankAdapter extends BaseMultiItemQuickAdapter<Gank> {
     private int mScreenWidth;
-    public MultiGankAdapter(int screenWidth,List<Gank> data){
+    private GankSubFragmentPresenter mPresenter;
+    public MultiGankAdapter(int screenWidth,List<Gank> data,GankSubFragmentPresenter presenter){
         super(data);
         mScreenWidth = screenWidth;
+        mPresenter = presenter;
         addItemType(Gank.IMAGE, R.layout.item_joke);
         addItemType(Gank.NORMAL, R.layout.item_gank);
     }
 
     @Override
-    protected void convert(BaseViewHolder helper, final Gank item) {
+    protected void convert(BaseViewHolder helper, final Gank item, final int position) {
         String time = item.getPublishedAt();
         helper.setText(R.id.tv_time, TimeUtils.parseTzTime(time))
-                .setText(R.id.tv_desc, item.getDesc())
-                .addOnClickListener(R.id.btn_share)
-                .addOnClickListener(R.id.btn_collect);
+                .setText(R.id.tv_desc, item.getDesc());
+//                .addOnClickListener(R.id.btn_share)
+//                .addOnClickListener(R.id.btn_collect);
         //收藏状态
         if(item.isCollected()){
-            ((Button)helper.getView(R.id.btn_collect)).setText("取消收藏");
+            ((TextView)helper.getView(R.id.tv_collect)).setText("取消收藏");
         }else{
-            ((Button)helper.getView(R.id.btn_collect)).setText("收藏");
+            ((TextView)helper.getView(R.id.tv_collect)).setText("收藏");
         }
+        helper.getView(R.id.btn_share).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if("福利".equals(item.getType())){
+                    UMImage image = new UMImage(mContext, item.getUrl());//网络图片
+                    new UmengShare().openShareBoard((Activity) mContext,null
+                            , item.getDesc()
+                            , item.getUrl()
+                            ,image);
+                }else{
+                    if(item.getImages()!=null
+                            && item.getImages().size()>0){
+                        UMImage image = new UMImage(mContext, item.getImages().get(0));//网络图片
+                        new UmengShare().openShareBoard((Activity) mContext,null
+                                , item.getDesc()
+                                , item.getUrl()
+                                ,image);
+                    }else{
+                        new UmengShare().openShareBoard((Activity) mContext,null
+                                , item.getDesc()
+                                , item.getUrl(),null);
+                    }
+
+                }
+            }
+        });
+        helper.getView(R.id.btn_collect).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mPresenter.setCollectState(position,item);
+            }
+        });
         switch (helper.getItemViewType()) {
             case Gank.NORMAL:
                 List<String> images = item.getImages();
@@ -62,8 +100,7 @@ public class MultiGankAdapter extends BaseMultiItemQuickAdapter<Gank> {
                     @Override
                     public void onClick(View view) {
                         Intent intent = new Intent(mContext, WebActivity.class);
-                        intent.putExtra("url", item.getUrl());
-                        intent.putExtra("text", item.getDesc());
+                        intent.putExtra("data", item);
                         mContext.startActivity(intent);
                     }
                 });

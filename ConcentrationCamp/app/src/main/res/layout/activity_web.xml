@@ -9,11 +9,24 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         >
-        <WebView
-            android:id="@+id/webView"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            />
+            >
+            <WebView
+                android:id="@+id/webView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                />
+            <ImageView
+                android:id="@+id/iv_loading"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_marginTop="250dp"
+                android:layout_centerInParent="true"
+                />
+        </RelativeLayout>
+
     </android.support.v4.widget.NestedScrollView>
 
 </android.support.design.widget.CoordinatorLayout>

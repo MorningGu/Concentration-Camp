@@ -4,29 +4,35 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ImageView;
 
 import hero.concentrationcamp.R;
+import hero.concentrationcamp.fresco.progressbar.CircleProgress;
 import hero.concentrationcamp.mvp.BasePresenter;
+import hero.concentrationcamp.mvp.model.entity.Gank;
 import hero.concentrationcamp.ui.base.BaseActivity;
+import hero.concentrationcamp.utils.PixelUtil;
 import hero.concentrationcamp.utils.ToastUtils;
 import hero.concentrationcamp.utils.UmengShare;
 
 public class WebActivity extends BaseActivity {
     WebView mWebView;
     Toolbar mToolbar;
-    String url;
-    String title;
+    ImageView iv_loading;
+    Gank data;
+    CircleProgress loading;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        url = getIntent().getStringExtra("url");
-        title = getIntent().getStringExtra("title");
-        mWebView.loadUrl(url);
-        initToolBar(title);
+        data = getIntent().getParcelableExtra("data");
+        mWebView.loadUrl(data.getUrl());
+        initToolBar(data.getDesc());
     }
 
     @Override
@@ -41,7 +47,6 @@ public class WebActivity extends BaseActivity {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setHomeButtonEnabled(true); //设置返回键可用
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -67,7 +72,7 @@ public class WebActivity extends BaseActivity {
                 ToastUtils.showToast("收藏了");
                 break;
             case R.id.action_share:
-                new UmengShare().openShareBoard(this,null,title,url,null);
+                new UmengShare().openShareBoard(this,null,data.getDesc(),data.getUrl(),null);
                 break;
         }
         return true;
@@ -76,11 +81,21 @@ public class WebActivity extends BaseActivity {
     public void findView() {
         mWebView = (WebView) findViewById(R.id.webView);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        iv_loading = (ImageView)findViewById(R.id.iv_loading);
     }
 
     @Override
     public void initView() {
         initWebView();
+        loading = new CircleProgress.Builder()
+                .setCircleRadius(PixelUtil.dp2px(30))
+                .setCircleWidth(PixelUtil.dp2px(5))
+                .build();
+        loading.inject(iv_loading);
+        loading.setTextColor(0xff252525);
+        loading.setTextSize(PixelUtil.dp2px(16));
+        loading.setMaxValue(100);
+
     }
     private void initWebView(){
         WebSettings settings = mWebView.getSettings();
@@ -98,21 +113,12 @@ public class WebActivity extends BaseActivity {
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
                 super.onProgressChanged(view, newProgress);
-//                if (newProgress == 100) {
-//                    loading.setVisibility(View.GONE);
-//                } else if(newProgress == 0) {
-//                    loading.setVisibility(View.VISIBLE);
-//                }
-            }
-
-            @Override
-            public void onReceivedTitle(WebView view, String title) {
-                super.onReceivedTitle(view, title);
-//                if(StringUtil.isNotEmpty(title)){
-//                    if(getHeaderLayout() != null){
-//                        getHeaderLayout().setDefaultTitle(title);
-//                    }
-//                }
+                if (newProgress == 100) {
+                    iv_loading.setVisibility(View.GONE);
+                } else if(newProgress == 0) {
+                    iv_loading.setVisibility(View.VISIBLE);
+                }
+                loading.setLevel(newProgress);
             }
         });
         mWebView.setWebViewClient(new WebViewClient(){
@@ -125,6 +131,7 @@ public class WebActivity extends BaseActivity {
             public void onReceivedError(WebView view, int errorCode,
                                         String description, String failingUrl) {
                 super.onReceivedError(view, errorCode, description, failingUrl);
+                iv_loading.setVisibility(View.GONE);
                 ToastUtils.showToast("加载失败");
             }
         });
@@ -133,9 +140,6 @@ public class WebActivity extends BaseActivity {
     protected void onPause() {
         super.onPause();
         mWebView.pauseTimers();
-        if (isFinishing()) {
-            mWebView.loadUrl("about:blank");
-        }
         mWebView.onPause();
     }
     @Override
@@ -143,6 +147,31 @@ public class WebActivity extends BaseActivity {
         super.onResume();
         mWebView.resumeTimers();
         mWebView.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        clearWebViewResource();
+        super.onDestroy();
+    }
+
+    /**
+     * 释放webview
+     * Description: release the memory of web view, otherwise it's resource will not be recycle.
+     * Created by Michael Lee on 7/18/16 20:38
+     */
+    public void clearWebViewResource() {
+        if (mWebView != null) {
+            mWebView.removeAllViews();
+            // in android 5.1(sdk:21) we should invoke this to avoid memory leak
+            // see (https://coolpers.github.io/webview/memory/leak/2015/07/16/
+            // android-5.1-webview-memory-leak.html)
+            ((ViewGroup) mWebView.getParent()).removeView(mWebView);
+            mWebView.setTag(null);
+            mWebView.clearHistory();
+            mWebView.destroy();
+            mWebView = null;
+        }
     }
     @Override
     protected int getCreateViewLayoutId() {

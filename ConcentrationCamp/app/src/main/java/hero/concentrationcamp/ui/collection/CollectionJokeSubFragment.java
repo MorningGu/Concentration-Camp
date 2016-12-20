@@ -52,7 +52,7 @@ public class CollectionJokeSubFragment extends BaseFragment<JokeSubContract.IJok
         //设置刷新时动画的颜色，可以设置4个
         // 顶部刷新的样式
         mSwipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_light, android.R.color.holo_red_light, android.R.color.holo_orange_light, android.R.color.holo_green_light);
-        mAdapter = new JokeDataAdapter(null,((BaseActivity)getActivity()).mScreenWidth);
+        mAdapter = new JokeDataAdapter(null,((BaseActivity)getActivity()).mScreenWidth,mPresenter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(layoutManager);

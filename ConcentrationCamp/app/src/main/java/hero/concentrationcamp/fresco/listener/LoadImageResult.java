@@ -11,5 +11,6 @@ public interface LoadImageResult {
 
     void onResult(Bitmap bitmap);
     void onResult(String path);
+    void onProgress(float progress);
 
 }

@@ -28,7 +28,7 @@ public class GankDataAdapter extends BaseQuickAdapter<Gank> {
     }
 
     @Override
-    protected void convert(BaseViewHolder helper, final Gank item) {
+    protected void convert(BaseViewHolder helper, final Gank item,int position) {
         String time = item.getPublishedAt();
         helper.setText(R.id.tv_time, TimeUtils.parseTzTime(time))
                 .setText(R.id.tv_creator, item.getWho())
@@ -66,8 +66,7 @@ public class GankDataAdapter extends BaseQuickAdapter<Gank> {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(mContext, WebActivity.class);
-                    intent.putExtra("url", item.getUrl());
-                    intent.putExtra("text", item.getDesc());
+                    intent.putExtra("data",item);
                     mContext.startActivity(intent);
                 }
             });

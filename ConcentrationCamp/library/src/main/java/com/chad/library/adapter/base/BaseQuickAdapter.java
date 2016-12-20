@@ -546,7 +546,7 @@ public abstract class BaseQuickAdapter<T> extends RecyclerView.Adapter<RecyclerV
 
         switch (viewType) {
             case 0:
-                convert((BaseViewHolder) holder, mData.get(holder.getLayoutPosition() - getHeaderLayoutCount()));
+                convert((BaseViewHolder) holder, mData.get(holder.getLayoutPosition() - getHeaderLayoutCount()),holder.getLayoutPosition() - getHeaderLayoutCount());
                 break;
             case LOADING_VIEW:
                 addLoadMore(holder);
@@ -558,7 +558,7 @@ public abstract class BaseQuickAdapter<T> extends RecyclerView.Adapter<RecyclerV
             case FOOTER_VIEW:
                 break;
             default:
-                convert((BaseViewHolder) holder, mData.get(holder.getLayoutPosition() - getHeaderLayoutCount()));
+                convert((BaseViewHolder) holder, mData.get(holder.getLayoutPosition() - getHeaderLayoutCount()),holder.getLayoutPosition() - getHeaderLayoutCount());
                 onBindDefViewHolder((BaseViewHolder) holder, mData.get(holder.getLayoutPosition() - getHeaderLayoutCount()));
                 break;
         }
@@ -862,9 +862,9 @@ public abstract class BaseQuickAdapter<T> extends RecyclerView.Adapter<RecyclerV
 
 
     /**
-     * @see #convert(BaseViewHolder, Object) ()
+     * @see #convert(BaseViewHolder, Object,int) ()
      * @deprecated This method is deprecated
-     * {@link #convert(BaseViewHolder, Object)} depending on your use case.
+     * {@link #convert(BaseViewHolder, Object,int)} depending on your use case.
      */
     @Deprecated
     protected void onBindDefViewHolder(BaseViewHolder holder, T item) {
@@ -938,7 +938,7 @@ public abstract class BaseQuickAdapter<T> extends RecyclerView.Adapter<RecyclerV
      * @param helper A fully initialized helper.
      * @param item   The item that needs to be displayed.
      */
-    protected abstract void convert(BaseViewHolder helper, T item);
+    protected abstract void convert(BaseViewHolder helper, T item,int position);
 
     /**
      * Get the row id associated with the specified position in the list.

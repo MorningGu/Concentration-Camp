@@ -1,5 +1,8 @@
 package hero.concentrationcamp.mvp.model.entity;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.chad.library.adapter.base.entity.MultiItemEntity;
 import com.google.gson.annotations.SerializedName;
 
@@ -17,7 +20,7 @@ import org.greenrobot.greendao.annotation.Transient;
  * Created by hero on 2016/12/6 0006.
  */
 @Entity
-public class Gank implements MultiItemEntity {
+public class Gank implements MultiItemEntity,Parcelable {
     @Transient
     public static final int IMAGE = 0x01;
     @Transient
@@ -62,7 +65,33 @@ public class Gank implements MultiItemEntity {
     public Gank() {
     }
 
-    
+
+    protected Gank(Parcel in) {
+        s_id = in.readString();
+        createdAt = in.readString();
+        desc = in.readString();
+        publishedAt = in.readString();
+        source = in.readString();
+        type = in.readString();
+        who = in.readString();
+        url = in.readString();
+        images = in.createStringArrayList();
+        used = in.readByte() != 0;
+        isCollected = in.readByte() != 0;
+    }
+
+    public static final Creator<Gank> CREATOR = new Creator<Gank>() {
+        @Override
+        public Gank createFromParcel(Parcel in) {
+            return new Gank(in);
+        }
+
+        @Override
+        public Gank[] newArray(int size) {
+            return new Gank[size];
+        }
+    };
+
     public String getCreatedAt() {
         return createdAt;
     }
@@ -177,5 +206,26 @@ public class Gank implements MultiItemEntity {
             return IMAGE;
         }
         return NORMAL;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        //这个顺序跟读的书序要一致
+        parcel.writeString(s_id);
+        parcel.writeString(createdAt);
+        parcel.writeString(desc);
+        parcel.writeString(publishedAt);
+        parcel.writeString(source);
+        parcel.writeString(type);
+        parcel.writeString(who);
+        parcel.writeString(url);
+        parcel.writeStringList(images);
+        parcel.writeByte(used?(byte)1:0);
+        parcel.writeByte(isCollected?(byte)1:0);
     }
 }

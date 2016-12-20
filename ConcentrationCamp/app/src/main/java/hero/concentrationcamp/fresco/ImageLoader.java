@@ -292,6 +292,11 @@ public class ImageLoader {
             public void onResult(String path) {
 
             }
+
+            @Override
+            public void onProgress(float progress) {
+
+            }
         });
     }
 
@@ -306,6 +311,11 @@ public class ImageLoader {
 
             @Override
             public void onResult(String path) {
+
+            }
+
+            @Override
+            public void onProgress(float progress) {
 
             }
         });
@@ -496,8 +506,8 @@ public class ImageLoader {
                             loadImageResult.onResult(tempBitmap);
                         }
                     } finally {
-                        imageReference.close();
                         closeableReference.close();
+                        CloseableReference.closeSafely(imageReference);
                     }
                 }
                 dataSource.close();
@@ -507,6 +517,7 @@ public class ImageLoader {
             @Override
             public void onFailureImpl(DataSource dataSource) {
                 Throwable throwable = dataSource.getFailureCause();
+                dataSource.close();
                 if (throwable != null) {
                     Log.e("ImageLoader", "onFailureImpl = " + throwable.toString());
                 }
@@ -558,8 +569,8 @@ public class ImageLoader {
                         loadFileResult.onResult(null);
                         e.printStackTrace();
                     } finally {
-                        imageReference.close();
                         closeableReference.close();
+                        CloseableReference.closeSafely(imageReference);
                     }
                 }
                 dataSource.close();
@@ -571,7 +582,7 @@ public class ImageLoader {
                 if (loadFileResult != null) {
                     loadFileResult.onResult(null);
                 }
-
+                dataSource.close();
                 Throwable throwable = dataSource.getFailureCause();
                 if (throwable != null) {
                     Log.e("ImageLoader", "onFailureImpl = " + throwable.toString());
@@ -612,8 +623,8 @@ public class ImageLoader {
                             loadImageResult.onResult(tempBitmap);
                         }
                     } finally {
-                        imageReference.close();
                         closeableReference.close();
+                        CloseableReference.closeSafely(imageReference);
                     }
                 }
                 dataSource.close();
@@ -623,6 +634,7 @@ public class ImageLoader {
             @Override
             public void onFailureImpl(DataSource dataSource) {
                 Throwable throwable = dataSource.getFailureCause();
+                dataSource.close();
                 if (throwable != null) {
                     Log.e("ImageLoader", "onFailureImpl = " + throwable.toString());
                 }
@@ -644,7 +656,6 @@ public class ImageLoader {
 
         Uri uri = Uri.parse(url);
         ImagePipeline imagePipeline = Fresco.getImagePipeline();
-
         final ImageRequest imageRequest = ImageRequestBuilder.newBuilderWithSource(uri)
                 .build();
 
@@ -652,6 +663,12 @@ public class ImageLoader {
         final DataSource<CloseableReference<CloseableImage>> source = imagePipeline.fetchDecodedImage(imageRequest, context);
 
         DataSubscriber dataSubscriber = new BaseDataSubscriber<CloseableReference<CloseableBitmap>>() {
+            @Override
+            public void onProgressUpdate(DataSource<CloseableReference<CloseableBitmap>> dataSource) {
+                super.onProgressUpdate(dataSource);
+                loadImageResult.onProgress(dataSource.getProgress());
+            }
+
             @Override
             public void onNewResultImpl(DataSource<CloseableReference<CloseableBitmap>> dataSource) {
                 if (!dataSource.isFinished()) {
@@ -670,8 +687,8 @@ public class ImageLoader {
                         File file=((FileBinaryResource)resource).getFile();
                         loadImageResult.onResult(file.getAbsolutePath());
                     } finally {
-                        imageReference.close();
                         closeableReference.close();
+                        CloseableReference.closeSafely(imageReference);
                     }
                 }
                 dataSource.close();
@@ -681,6 +698,7 @@ public class ImageLoader {
             @Override
             public void onFailureImpl(DataSource dataSource) {
                 Throwable throwable = dataSource.getFailureCause();
+                dataSource.close();
                 if (throwable != null) {
                     Log.e("ImageLoader", "onFailureImpl = " + throwable.toString());
                 }

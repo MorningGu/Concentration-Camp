@@ -18,7 +18,6 @@ import hero.concentrationcamp.R;
 import hero.concentrationcamp.mvp.contract.GankSubContract;
 import hero.concentrationcamp.mvp.model.entity.Gank;
 import hero.concentrationcamp.mvp.presenter.GankSubFragmentPresenter;
-import hero.concentrationcamp.ui.adapter.GankDataAdapter;
 import hero.concentrationcamp.ui.adapter.MultiGankAdapter;
 import hero.concentrationcamp.ui.base.BaseActivity;
 import hero.concentrationcamp.ui.base.BaseFragment;
@@ -50,7 +49,7 @@ public class CollectionGankSubFragment extends BaseFragment<GankSubContract.IGan
         //设置刷新时动画的颜色，可以设置4个
         // 顶部刷新的样式
         mSwipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_light, android.R.color.holo_red_light, android.R.color.holo_orange_light, android.R.color.holo_green_light);
-        mAdapter = new MultiGankAdapter(((BaseActivity)getActivity()).mScreenWidth,null);
+        mAdapter = new MultiGankAdapter(((BaseActivity)getActivity()).mScreenWidth,null,mPresenter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(layoutManager);
