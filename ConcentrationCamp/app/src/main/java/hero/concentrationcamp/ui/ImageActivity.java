@@ -3,20 +3,27 @@ package hero.concentrationcamp.ui;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 
 import com.umeng.socialize.UMShareAPI;
 import com.umeng.socialize.media.UMImage;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 
 import hero.concentrationcamp.R;
 import hero.concentrationcamp.fresco.ImageLoader;
@@ -25,7 +32,17 @@ import hero.concentrationcamp.fresco.progressbar.CircleProgress;
 import hero.concentrationcamp.mvp.BasePresenter;
 import hero.concentrationcamp.ui.base.BaseActivity;
 import hero.concentrationcamp.utils.PixelUtil;
+import hero.concentrationcamp.utils.ToastUtils;
 import hero.concentrationcamp.utils.UmengShare;
+import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
+import io.reactivex.FlowableEmitter;
+import io.reactivex.FlowableOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subscribers.ResourceSubscriber;
 
 public class ImageActivity extends BaseActivity {
     private static final String HTML_BEGIN = "<html><body bgcolor='#000000'>";
@@ -33,12 +50,18 @@ public class ImageActivity extends BaseActivity {
     private static final String HTML_META_BEGIN = "<head><meta name='viewport' ";
     private static final String HTML_META_END = "'/></head>";
     private static final String HTML_END = "'></span></div></body></html>";
-    String url;
+    private CompositeDisposable mDisposables;
+    String url; //网络地址
     String text;
+    String mPath; //缓存路径
+    String imageType ;//图片格式
     WebView mWebView;
-    Button btn_share;
+    ImageView btn_share;
+    ImageView btn_back;
+    ImageView btn_download;
     ImageView iv_loading;
     CircleProgress loading;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,7 +80,9 @@ public class ImageActivity extends BaseActivity {
 
     @Override
     public void findView() {
-        btn_share = (Button)findViewById(R.id.btn_share);
+        btn_share = (ImageView)findViewById(R.id.btn_share);
+        btn_back = (ImageView)findViewById(R.id.btn_back);
+        btn_download = (ImageView)findViewById(R.id.btn_download);
         //这里是为了使用application的context而不用activity的，因为可能会有泄露
         RelativeLayout layout_web = (RelativeLayout)findViewById(R.id.layout_web);
         iv_loading = (ImageView)findViewById(R.id.iv_loading);
@@ -70,10 +95,7 @@ public class ImageActivity extends BaseActivity {
     @Override
     public void initView() {
         initWebView();
-        loading = new CircleProgress.Builder().build();
-        loading.initProperty();
-        loading.inject(iv_loading);
-        loading.setMaxValue(100);
+        initLoading();
         btn_share.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -81,6 +103,78 @@ public class ImageActivity extends BaseActivity {
                 new UmengShare().openShareBoard(ImageActivity.this,null,text,image);
             }
         });
+        btn_download.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(TextUtils.isEmpty(mPath)){
+                    ToastUtils.showToast("存储失败，请在图片加载完成后重试");
+                    return;
+                }
+                ResourceSubscriber resultSubscriber = new ResourceSubscriber<String>() {
+                    @Override
+                    public void onNext(String path) {
+                        if(TextUtils.isEmpty(path)){
+                            ToastUtils.showToast("存储失败");
+                            return;
+                        }
+                        ToastUtils.showToast("图片已存储到"+path);
+                        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + path)));
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        ToastUtils.showToast("存储失败");
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                };
+                addSubscription(Flowable.create(new FlowableOnSubscribe<String>() {
+                    @Override
+                    public void subscribe(FlowableEmitter<String> e) throws Exception {
+                        //处理后缀
+                        if (TextUtils.isEmpty(imageType)) {
+                            imageType = ".jpg";
+                        } else {
+                            imageType = "."+imageType.substring(6, imageType.length());
+                        }
+                        String path = Environment
+                                .getExternalStorageDirectory().getAbsolutePath()
+                                + File.separator
+                                + "Pictures"
+                                +File.separator
+                                +"img"+ System.currentTimeMillis()+imageType;
+                        copyFile(mPath, path);
+                        e.onNext(path);
+                        e.onComplete();
+                    }
+                }, BackpressureStrategy.DROP)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(resultSubscriber));
+            }
+        });
+        btn_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
+    }
+    /**
+     * 初始化laoding
+     */
+    private void initLoading(){
+        loading = new CircleProgress.Builder()
+                .setCircleRadius(PixelUtil.dp2px(30))
+                .setCircleWidth(PixelUtil.dp2px(5))
+                .build();
+        loading.inject(iv_loading);
+        loading.setTextColor(0xffffffff);
+        loading.setTextSize(PixelUtil.dp2px(16));
+        loading.setMaxValue(100);
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -144,10 +238,12 @@ public class ImageActivity extends BaseActivity {
                 if(isFinishing() || mWebView==null){
                     return;
                 }
+                mPath = path;
                 //获得图片宽高
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inJustDecodeBounds = true;
                 BitmapFactory.decodeFile(path, options);
+                imageType = options.outMimeType;
                 float scale = 1;
                 float width = options.outWidth;
                 float height = options.outHeight;
@@ -221,6 +317,7 @@ public class ImageActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         clearWebViewResource();
+        dispose();
         super.onDestroy();
     }
     /**
@@ -240,5 +337,49 @@ public class ImageActivity extends BaseActivity {
             mWebView.destroy();
             mWebView = null;
         }
+    }
+    //取消所有的订阅
+    public void dispose(){
+        if(mDisposables!=null){
+            mDisposables.clear();
+        }
+    }
+
+    protected void addSubscription(Disposable disposable) {
+        if (disposable == null) return;
+        if (mDisposables == null) {
+            mDisposables = new CompositeDisposable();
+        }
+        mDisposables.add(disposable);
+    }
+    /**
+     * 复制单个文件
+     * @param oldPath String 原文件路径 如：c:/fqf.txt
+     * @param newPath String 复制后路径 如：f:/fqf.txt
+     * @return boolean
+     */
+    public boolean copyFile(String oldPath, String newPath) {
+        try {
+            int bytesum = 0;
+            int byteread = 0;
+            File oldfile = new File(oldPath);
+            if (oldfile.exists()) { //文件存在时
+                InputStream inStream = new FileInputStream(oldPath); //读入原文件
+                FileOutputStream fs = new FileOutputStream(newPath);
+                byte[] buffer = new byte[1444];
+                int length;
+                while ( (byteread = inStream.read(buffer)) != -1) {
+                    bytesum += byteread; //字节数 文件大小
+                    System.out.println(bytesum);
+                    fs.write(buffer, 0, byteread);
+                }
+                inStream.close();
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 }

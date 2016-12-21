@@ -29,7 +29,7 @@ public class ToastUtils {
             mToast.setDuration(duration);
             mToast.setText(text);
         }
-//        mToast.show();
+        mToast.show();
     }
 
     public static void showToast (Context context, int strId, int duration) {

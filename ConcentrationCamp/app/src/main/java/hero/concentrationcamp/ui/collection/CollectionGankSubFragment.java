@@ -104,6 +104,7 @@ public class CollectionGankSubFragment extends BaseFragment<GankSubContract.IGan
                 }
             }
         });
+        mPresenter.bindRxBus();
         mPresenter.getGankData(true,lastTid);
     }
     @Override
@@ -128,6 +129,15 @@ public class CollectionGankSubFragment extends BaseFragment<GankSubContract.IGan
     @Override
     public void updateItemState(int position) {
         mAdapter.notifyItemChanged(position);
+    }
+
+    @Override
+    public void updateData(Gank gank) {
+        if(mAdapter.getDetail()==null){
+            return;
+        }
+        mAdapter.getDetail().setCollected(gank.isCollected());
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override

@@ -9,8 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
-import com.chad.library.adapter.base.listener.OnItemClickListener;
-import com.umeng.socialize.media.UMImage;
 
 import java.util.List;
 
@@ -22,8 +20,6 @@ import hero.concentrationcamp.mvp.presenter.GankSubFragmentPresenter;
 import hero.concentrationcamp.ui.adapter.MultiGankAdapter;
 import hero.concentrationcamp.ui.base.BaseActivity;
 import hero.concentrationcamp.ui.base.BaseFragment;
-import hero.concentrationcamp.ui.adapter.GankDataAdapter;
-import hero.concentrationcamp.utils.UmengShare;
 
 /**
  * Created by hero on 2016/12/2 0002.
@@ -74,46 +70,7 @@ public class GankSubFragment extends BaseFragment<GankSubContract.IGankSubFragme
                 mPresenter.getGankData(mColumn,pageNo+1,false);
             }
         });
-//        mRecyclerView.addOnItemTouchListener(new OnItemClickListener() {
-//            @Override
-//            public void SimpleOnItemClick(BaseQuickAdapter adapter, View view, int position) {}
-//
-//            @Override
-//            public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
-//                switch (view.getId()) {
-//                    case R.id.btn_share:{
-//                        if("福利".equals(((Gank)adapter.getData().get(position)).getType())){
-//                            UMImage image = new UMImage(getActivity(), ((Gank)adapter.getData().get(position)).getUrl());//网络图片
-//                            new UmengShare().openShareBoard(getActivity(),null
-//                                    , ((Gank)adapter.getData().get(position)).getDesc()
-//                                    , ((Gank)adapter.getData().get(position)).getUrl()
-//                                    ,image);
-//                        }else{
-//                            if(((Gank)adapter.getData().get(position)).getImages()!=null
-//                                    && ((Gank)adapter.getData().get(position)).getImages().size()>0){
-//                                UMImage image = new UMImage(getActivity(), ((Gank)adapter.getData().get(position)).getImages().get(0));//网络图片
-//                                new UmengShare().openShareBoard(getActivity(),null
-//                                        , ((Gank)adapter.getData().get(position)).getDesc()
-//                                        , ((Gank)adapter.getData().get(position)).getUrl()
-//                                        ,image);
-//                            }else{
-//                                new UmengShare().openShareBoard(getActivity(),null
-//                                        , ((Gank)adapter.getData().get(position)).getDesc()
-//                                        , ((Gank)adapter.getData().get(position)).getUrl(),null);
-//                            }
-//
-//                        }
-//                        break;
-//                    }
-//                    case R.id.btn_collect:{
-//                        mPresenter.setCollectState(position,((Gank)adapter.getData().get(position)));
-//                        break;
-//                    }
-//                    default:
-//                        break;
-//                }
-//            }
-//        });
+        mPresenter.bindRxBus();
         mPresenter.getGankData(mColumn,1,true);
     }
 
@@ -155,6 +112,19 @@ public class GankSubFragment extends BaseFragment<GankSubContract.IGankSubFragme
 
     @Override
     public void updateItemState(int position) {
-        mAdapter.notifyItemChanged(position);
+        //单个更新有闪烁的问题
+        mAdapter.notifyDataSetChanged();
+//        mAdapter.notifyItemChanged(position);
     }
+
+    @Override
+    public void updateData(Gank gank) {
+        if(mAdapter.getDetail()==null){
+            return;
+        }
+        //收藏状态在其他页面变更后，在这里要进行更新
+        mAdapter.getDetail().setCollected(gank.isCollected());
+        mAdapter.notifyDataSetChanged();
+    }
+
 }

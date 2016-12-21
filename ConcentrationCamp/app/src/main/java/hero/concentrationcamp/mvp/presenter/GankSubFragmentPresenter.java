@@ -12,6 +12,8 @@ import hero.concentrationcamp.mvp.model.entity.GankVo;
 import hero.concentrationcamp.mvp.model.entity.SourceColumn;
 import hero.concentrationcamp.mvp.model.greendao.GreenDaoHelper;
 import hero.concentrationcamp.retrofit.ApiManager;
+import hero.concentrationcamp.rxjava.ErrorBean;
+import hero.concentrationcamp.rxjava.RxBusHelper;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.reactivex.FlowableEmitter;
@@ -24,6 +26,22 @@ import io.reactivex.subscribers.ResourceSubscriber;
 
 public class GankSubFragmentPresenter extends BasePresenter<GankSubContract.IGankSubFragmentView> implements GankSubContract.IGankSubFragmentPresenter {
     GankSubFragmentDataFactory factory = new GankSubFragmentDataFactory();
+    public void bindRxBus(){
+        addSubscription(RxBusHelper.doOnMainThread(Gank.class, new RxBusHelper.OnEventListener<Gank>() {
+            @Override
+            public void onEvent(Gank gank) {
+                GankSubContract.IGankSubFragmentView view  = getView();
+                if(view!=null){
+                    view.updateData(gank);
+                }
+            }
+
+            @Override
+            public void onError(ErrorBean errorBean) {
+
+            }
+        }));
+    }
     @Override
     public void getGankData(SourceColumn column, int pageNo, final boolean isRefresh) {
         ResourceSubscriber resultSubscriber = new ResourceSubscriber<GankVo>() {

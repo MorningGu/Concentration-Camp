@@ -12,16 +12,20 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
 
+import java.util.List;
+
 import hero.concentrationcamp.R;
 import hero.concentrationcamp.fresco.progressbar.CircleProgress;
-import hero.concentrationcamp.mvp.BasePresenter;
+import hero.concentrationcamp.mvp.contract.GankSubContract;
 import hero.concentrationcamp.mvp.model.entity.Gank;
+import hero.concentrationcamp.mvp.presenter.GankSubFragmentPresenter;
+import hero.concentrationcamp.rxjava.RxBusHelper;
 import hero.concentrationcamp.ui.base.BaseActivity;
 import hero.concentrationcamp.utils.PixelUtil;
 import hero.concentrationcamp.utils.ToastUtils;
 import hero.concentrationcamp.utils.UmengShare;
 
-public class WebActivity extends BaseActivity {
+public class WebActivity extends BaseActivity<GankSubContract.IGankSubFragmentView,GankSubFragmentPresenter> implements GankSubContract.IGankSubFragmentView {
     WebView mWebView;
     Toolbar mToolbar;
     ImageView iv_loading;
@@ -36,13 +40,13 @@ public class WebActivity extends BaseActivity {
     }
 
     @Override
-    protected BasePresenter createPresenter() {
-        return null;
+    protected GankSubFragmentPresenter createPresenter() {
+        return new GankSubFragmentPresenter();
     }
     /**
      * 初始化toolbar
      */
-    private void initToolBar(String title){
+    private void initToolBar(final String title){
         mToolbar.setTitle(title);//设置Toolbar标题
         setSupportActionBar(mToolbar);
         getSupportActionBar().setHomeButtonEnabled(true); //设置返回键可用
@@ -50,7 +54,15 @@ public class WebActivity extends BaseActivity {
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                return false;
+                switch (item.getItemId()) {
+                    case R.id.action_collect:
+                        mPresenter.setCollectState(0,data);
+                        break;
+                    case R.id.action_share:
+                        new UmengShare().openShareBoard(WebActivity.this,null,data.getDesc(),data.getUrl(),null);
+                        break;
+                }
+                return true;
             }
         });
     }
@@ -62,20 +74,19 @@ public class WebActivity extends BaseActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        //点击back键finish当前activity
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                break;
-            case R.id.action_collect:
-                ToastUtils.showToast("收藏了");
-                break;
-            case R.id.action_share:
-                new UmengShare().openShareBoard(this,null,data.getDesc(),data.getUrl(),null);
-                break;
-        }
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        updateCollectMenuItem(menu);
+        super.onPrepareOptionsMenu(menu);
         return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //back键
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
     @Override
     public void findView() {
@@ -87,6 +98,13 @@ public class WebActivity extends BaseActivity {
     @Override
     public void initView() {
         initWebView();
+        initLoading();
+    }
+
+    /**
+     * 初始化laoding
+     */
+    private void initLoading(){
         loading = new CircleProgress.Builder()
                 .setCircleRadius(PixelUtil.dp2px(30))
                 .setCircleWidth(PixelUtil.dp2px(5))
@@ -95,8 +113,11 @@ public class WebActivity extends BaseActivity {
         loading.setTextColor(0xff252525);
         loading.setTextSize(PixelUtil.dp2px(16));
         loading.setMaxValue(100);
-
     }
+
+    /**
+     * 初始化webview
+     */
     private void initWebView(){
         WebSettings settings = mWebView.getSettings();
         settings.setJavaScriptEnabled(true);    //支持javascript
@@ -185,5 +206,35 @@ public class WebActivity extends BaseActivity {
         }else{
             super.onBackPressed();
         }
+    }
+    private void updateCollectMenuItem(Menu menu){
+        if(menu==null){
+            return;
+        }
+        if(data.isCollected()){
+            menu.getItem(0).setTitle("取消收藏");
+        }else{
+            menu.getItem(0).setTitle("收藏");
+        }
+    }
+    @Override
+    public void updateData(boolean isRefresh, List<Gank> data) {
+        //不需要实现，这里用不到
+    }
+
+    /**
+     * 收藏状态的改变
+     * @param position
+     */
+    @Override
+    public void updateItemState(int position) {
+//        updateCollectMenuItem(mMenu);
+        //发射数据
+        RxBusHelper.post(data);
+    }
+
+    @Override
+    public void updateData(Gank gank) {
+        //无需实现
     }
 }

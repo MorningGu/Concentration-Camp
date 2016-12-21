@@ -32,6 +32,7 @@ import hero.concentrationcamp.utils.UmengShare;
 public class MultiGankAdapter extends BaseMultiItemQuickAdapter<Gank> {
     private int mScreenWidth;
     private GankSubFragmentPresenter mPresenter;
+    private Gank detail;
     public MultiGankAdapter(int screenWidth,List<Gank> data,GankSubFragmentPresenter presenter){
         super(data);
         mScreenWidth = screenWidth;
@@ -45,8 +46,6 @@ public class MultiGankAdapter extends BaseMultiItemQuickAdapter<Gank> {
         String time = item.getPublishedAt();
         helper.setText(R.id.tv_time, TimeUtils.parseTzTime(time))
                 .setText(R.id.tv_desc, item.getDesc());
-//                .addOnClickListener(R.id.btn_share)
-//                .addOnClickListener(R.id.btn_collect);
         //收藏状态
         if(item.isCollected()){
             ((TextView)helper.getView(R.id.tv_collect)).setText("取消收藏");
@@ -89,8 +88,13 @@ public class MultiGankAdapter extends BaseMultiItemQuickAdapter<Gank> {
             case Gank.NORMAL:
                 List<String> images = item.getImages();
                 if(images!=null && images.size()>0){
-                    //有图就展示网络图
-                    ImageLoader.loadImage((SimpleDraweeView)helper.getView(R.id.iv_image),images.get(0)+"?imageView2/0/w/300", GConfig.IMAGE_SMALL, GConfig.IMAGE_SMALL);
+                    if(!images.get(0).equals(helper.getView(R.id.iv_image).getTag())){
+                        helper.getView(R.id.iv_image).setTag(images.get(0));
+                        //有图就展示网络图
+                        ImageLoader.loadImage((SimpleDraweeView)helper.getView(R.id.iv_image)
+                                ,images.get(0)+"?imageView2/0/w/300"
+                                ,GConfig.IMAGE_SMALL, GConfig.IMAGE_SMALL);
+                    }
                 }else{
                     //展示占位图
                     ImageLoader.loadDrawable((SimpleDraweeView)helper.getView(R.id.iv_image),R.mipmap.ic_launcher);
@@ -99,6 +103,7 @@ public class MultiGankAdapter extends BaseMultiItemQuickAdapter<Gank> {
                 helper.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        detail = item;
                         Intent intent = new Intent(mContext, WebActivity.class);
                         intent.putExtra("data", item);
                         mContext.startActivity(intent);
@@ -108,9 +113,15 @@ public class MultiGankAdapter extends BaseMultiItemQuickAdapter<Gank> {
             case Gank.IMAGE:
                 CircleProgress.Builder builder = new CircleProgress.Builder();
                 builder.build().injectFresco((SimpleDraweeView)helper.getView(R.id.iv_image));
-                ImageLoader.loadImage((SimpleDraweeView)helper.getView(R.id.iv_image),item.getUrl()+"?imageView2/0/w/800"
-                        ,new ResizeControllerByWidth((SimpleDraweeView)helper.getView(R.id.iv_image)
-                                ,mScreenWidth- PixelUtil.dp2px(40)));
+                if(!item.getUrl().equals(helper.getView(R.id.iv_image).getTag())){
+                    //加tag 防止刷新闪烁
+                    helper.getView(R.id.iv_image).setTag(item.getUrl());
+                    //有图就展示网络图
+                    ImageLoader.loadImage((SimpleDraweeView)helper.getView(R.id.iv_image),item.getUrl()+"?imageView2/0/w/800"
+                            ,new ResizeControllerByWidth((SimpleDraweeView)helper.getView(R.id.iv_image)
+                                    ,mScreenWidth- PixelUtil.dp2px(40)));
+                }
+
                 helper.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -122,5 +133,8 @@ public class MultiGankAdapter extends BaseMultiItemQuickAdapter<Gank> {
                 });
                 break;
         }
+    }
+    public Gank getDetail(){
+        return detail;
     }
 }

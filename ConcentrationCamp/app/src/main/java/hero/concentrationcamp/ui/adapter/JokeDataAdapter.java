@@ -97,16 +97,19 @@ public class JokeDataAdapter extends BaseQuickAdapter<Joke> {
             }
         });
         if(!TextUtils.isEmpty(item.getImg())){
-            helper.getView(R.id.iv_image).setVisibility(View.VISIBLE);
-            helper.addOnClickListener(R.id.iv_image);
-            CircleProgress.Builder builder = new CircleProgress.Builder();
-            builder.build().injectFresco((SimpleDraweeView)helper.getView(R.id.iv_image));
-            ImageLoader.loadImage((SimpleDraweeView)helper.getView(R.id.iv_image),item.getImg()
-                    ,new ResizeControllerByWidth((SimpleDraweeView)helper.getView(R.id.iv_image)
-                            ,mScreenWidth- PixelUtil.dp2px(40)));
+            //加tag 防止刷新闪烁
+            if(!item.getImg().equals(helper.getView(R.id.iv_image).getTag())){
+                helper.getView(R.id.iv_image).setTag(item.getImg());
+                helper.getView(R.id.iv_image).setVisibility(View.VISIBLE);
+                helper.addOnClickListener(R.id.iv_image);
+                CircleProgress.Builder builder = new CircleProgress.Builder();
+                builder.build().injectFresco((SimpleDraweeView)helper.getView(R.id.iv_image));
+                ImageLoader.loadImage((SimpleDraweeView)helper.getView(R.id.iv_image),item.getImg()
+                        ,new ResizeControllerByWidth((SimpleDraweeView)helper.getView(R.id.iv_image)
+                                ,mScreenWidth- PixelUtil.dp2px(40)));
+            }
         }else{
             helper.getView(R.id.iv_image).setVisibility(View.GONE);
         }
-
     }
 }

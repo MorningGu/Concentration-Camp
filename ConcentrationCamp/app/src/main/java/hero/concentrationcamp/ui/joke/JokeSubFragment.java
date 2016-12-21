@@ -147,7 +147,9 @@ public class JokeSubFragment extends BaseFragment<JokeSubContract.IJokeSubFragme
 
     @Override
     public void updateItemState(int position) {
-        mAdapter.notifyItemChanged(position);
+        mAdapter.notifyDataSetChanged();
+        //为了解决更新时图片闪烁的问题
+//        mAdapter.notifyItemChanged(position);
     }
 
     @Override
