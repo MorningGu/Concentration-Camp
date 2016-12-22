@@ -238,6 +238,9 @@ public class ImageActivity extends BaseActivity {
                 if(isFinishing() || mWebView==null){
                     return;
                 }
+                if(TextUtils.isEmpty(path)){
+                    ToastUtils.showToast("加载失败");
+                }
                 mPath = path;
                 //获得图片宽高
                 BitmapFactory.Options options = new BitmapFactory.Options();

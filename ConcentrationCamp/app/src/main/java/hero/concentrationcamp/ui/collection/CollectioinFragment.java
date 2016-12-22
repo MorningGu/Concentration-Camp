@@ -70,7 +70,7 @@ public class CollectioinFragment extends BaseFragment<GankContract.IGankFragment
 
     @Override
     public void initPager(List<BaseFragment> fragments, SourceColumn[] columns) {
-        viewPager.setOffscreenPageLimit(2);
+        viewPager.setOffscreenPageLimit(1);//预加载1页
         adapter = new SubFragmentAdapter(getChildFragmentManager(), fragments,columns);
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);

@@ -56,7 +56,9 @@ public class JokeSubFragment extends BaseFragment<JokeSubContract.IJokeSubFragme
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setItemAnimator(null);//解决更新单个item时的闪烁
         mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setItemViewCacheSize(3);
         mAdapter.openLoadMore(10);
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View view = inflater.inflate(R.layout.layout_empty,null);
@@ -68,53 +70,6 @@ public class JokeSubFragment extends BaseFragment<JokeSubContract.IJokeSubFragme
                 mPresenter.getJokeData(mColumn.getCode(),pageNo+1,false);
             }
         });
-//        mRecyclerView.addOnItemTouchListener(new OnItemClickListener() {
-//            @Override
-//            public void SimpleOnItemClick(BaseQuickAdapter adapter, View view, int position) {
-//
-//            }
-//
-//            @Override
-//            public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
-//                switch (view.getId()) {
-//                    case R.id.iv_image:{
-//                        Intent intent = new Intent(getActivity(), ImageActivity.class);
-//                        intent.putExtra("url",((Joke)(adapter.getData().get(position))).getImg());
-//                        if(((Joke)(adapter.getData().get(position))).getType()==1){
-//                            //文字的时候显示text
-//                            intent.putExtra("text",((Joke)(adapter.getData().get(position))).getText());
-//                        }else{
-//                            //图片的时候显示title
-//                            intent.putExtra("text",((Joke)(adapter.getData().get(position))).getTitle());
-//                        }
-//                        startActivity(intent);
-//                        break;
-//                    }
-//                    case R.id.btn_collect:
-//                        mPresenter.setCollectState(position,(Joke)(adapter.getData().get(position)));
-//                        break;
-//                    case R.id.btn_share:{
-//                        String text;
-//                        if(((Joke)(adapter.getData().get(position))).getType()==1){
-//                            //文字的时候显示text
-//                            text = ((Joke)(adapter.getData().get(position))).getText();
-//                        }else{
-//                            //图片的时候显示title
-//                            text = ((Joke)(adapter.getData().get(position))).getTitle();
-//                        }
-//                        if(TextUtils.isEmpty(((Joke)(adapter.getData().get(position))).getImg())){
-//                            new UmengShare().openShareBoard(getActivity(),text,text);
-//                        }else{
-//                            UMImage image = new UMImage(getActivity(), ((Joke)(adapter.getData().get(position))).getImg());//网络图片
-//                            new UmengShare().openShareBoard(getActivity(),text,text,((Joke)(adapter.getData().get(position))).getImg(),image);
-//                        }
-//                        break;
-//                    }
-//                    default:
-//                        break;
-//                }
-//            }
-//        });
         mPresenter.getJokeData(mColumn.getCode(),1,true);
     }
     @Override
@@ -147,9 +102,9 @@ public class JokeSubFragment extends BaseFragment<JokeSubContract.IJokeSubFragme
 
     @Override
     public void updateItemState(int position) {
-        mAdapter.notifyDataSetChanged();
+//        mAdapter.notifyDataSetChanged();
         //为了解决更新时图片闪烁的问题
-//        mAdapter.notifyItemChanged(position);
+        mAdapter.notifyItemChanged(position);
     }
 
     @Override

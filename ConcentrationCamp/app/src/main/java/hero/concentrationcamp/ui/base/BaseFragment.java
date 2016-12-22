@@ -35,7 +35,6 @@ public abstract class BaseFragment<V,T extends BasePresenter<V>> extends Fragmen
         super.onCreate(savedInstanceState);
         // 防止重复调用onCreate方法，造成在initData方法中adapter重复初始化问题
         if (!viewCreated) {
-            viewCreated = true;
             initData();
         }
     }
@@ -60,10 +59,10 @@ public abstract class BaseFragment<V,T extends BasePresenter<V>> extends Fragmen
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (viewCreated) {
+        if (!viewCreated) {
             findView(view);
             initView(savedInstanceState);
-            viewCreated = false;
+            viewCreated = true;
         }
     }
     @CallSuper
@@ -74,6 +73,7 @@ public abstract class BaseFragment<V,T extends BasePresenter<V>> extends Fragmen
         if (null != inflateView) {
             ((ViewGroup) inflateView.getParent()).removeView(inflateView);
         }
+        viewCreated = false;
     }
     private void detachPresenter(){
         //presenter与activity解绑定

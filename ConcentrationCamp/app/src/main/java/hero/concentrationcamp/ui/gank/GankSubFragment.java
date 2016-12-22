@@ -58,6 +58,7 @@ public class GankSubFragment extends BaseFragment<GankSubContract.IGankSubFragme
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setItemAnimator(null);//解决更新单个item时的闪烁
         mRecyclerView.setAdapter(mAdapter);
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View view = inflater.inflate(R.layout.layout_empty,null);
@@ -113,8 +114,8 @@ public class GankSubFragment extends BaseFragment<GankSubContract.IGankSubFragme
     @Override
     public void updateItemState(int position) {
         //单个更新有闪烁的问题
-        mAdapter.notifyDataSetChanged();
-//        mAdapter.notifyItemChanged(position);
+//        mAdapter.notifyDataSetChanged();
+        mAdapter.notifyItemChanged(position);
     }
 
     @Override

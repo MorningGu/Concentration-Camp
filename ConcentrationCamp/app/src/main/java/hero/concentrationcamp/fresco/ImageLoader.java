@@ -684,8 +684,12 @@ public class ImageLoader {
                                 .getEncodedCacheKey(imageRequest,null);
                         BinaryResource resource = ImagePipelineFactory.getInstance()
                                 .getMainFileCache().getResource(cacheKey);
-                        File file=((FileBinaryResource)resource).getFile();
-                        loadImageResult.onResult(file.getAbsolutePath());
+                        if(resource!=null){
+                            File file=((FileBinaryResource)resource).getFile();
+                            loadImageResult.onResult(file.getAbsolutePath());
+                        }else{
+                            loadImageResult.onResult((String) null);
+                        }
                     } finally {
                         closeableReference.close();
                         CloseableReference.closeSafely(imageReference);

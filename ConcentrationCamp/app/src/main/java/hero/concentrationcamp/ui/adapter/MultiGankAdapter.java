@@ -96,8 +96,11 @@ public class MultiGankAdapter extends BaseMultiItemQuickAdapter<Gank> {
                                 ,GConfig.IMAGE_SMALL, GConfig.IMAGE_SMALL);
                     }
                 }else{
-                    //展示占位图
-                    ImageLoader.loadDrawable((SimpleDraweeView)helper.getView(R.id.iv_image),R.mipmap.ic_launcher);
+                    if(!("placeImage"+R.mipmap.ic_launcher).equals(helper.getView(R.id.iv_image).getTag())){
+                        helper.getView(R.id.iv_image).setTag("placeImage"+R.mipmap.ic_launcher);
+                        //展示占位图
+                        ImageLoader.loadDrawable((SimpleDraweeView)helper.getView(R.id.iv_image),R.mipmap.ic_launcher);
+                    }
                 }
                 helper.setText(R.id.tv_creator, item.getWho());
                 helper.itemView.setOnClickListener(new View.OnClickListener() {
@@ -111,11 +114,11 @@ public class MultiGankAdapter extends BaseMultiItemQuickAdapter<Gank> {
                 });
                 break;
             case Gank.IMAGE:
-                CircleProgress.Builder builder = new CircleProgress.Builder();
-                builder.build().injectFresco((SimpleDraweeView)helper.getView(R.id.iv_image));
                 if(!item.getUrl().equals(helper.getView(R.id.iv_image).getTag())){
                     //加tag 防止刷新闪烁
                     helper.getView(R.id.iv_image).setTag(item.getUrl());
+                    CircleProgress.Builder builder = new CircleProgress.Builder();
+                    builder.build().injectFresco((SimpleDraweeView)helper.getView(R.id.iv_image));
                     //有图就展示网络图
                     ImageLoader.loadImage((SimpleDraweeView)helper.getView(R.id.iv_image),item.getUrl()+"?imageView2/0/w/800"
                             ,new ResizeControllerByWidth((SimpleDraweeView)helper.getView(R.id.iv_image)

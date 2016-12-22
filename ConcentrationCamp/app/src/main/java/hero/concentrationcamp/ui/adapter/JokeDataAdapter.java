@@ -2,6 +2,7 @@ package hero.concentrationcamp.ui.adapter;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.TextUtils;
 import android.view.View;
@@ -41,8 +42,6 @@ public class JokeDataAdapter extends BaseQuickAdapter<Joke> {
     @Override
     protected void convert(final BaseViewHolder helper, final Joke item, final int position) {
         helper.setText(R.id.tv_time, item.getCt());
-//              .addOnClickListener(R.id.btn_collect)
-//              .addOnClickListener(R.id.btn_share);
         if(item.getType()==1){
             //文字的时候显示text
             helper.setText(R.id.tv_desc, Html.fromHtml(item.getText()));

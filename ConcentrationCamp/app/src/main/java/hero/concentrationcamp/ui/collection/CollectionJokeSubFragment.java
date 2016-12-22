@@ -56,6 +56,7 @@ public class CollectionJokeSubFragment extends BaseFragment<JokeSubContract.IJok
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setItemAnimator(null);
         mRecyclerView.setAdapter(mAdapter);
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View view = inflater.inflate(R.layout.layout_empty,null);

@@ -74,7 +74,7 @@ public class GankFragment extends BaseFragment<GankContract.IGankFragmentView,Ga
 
     @Override
     public void initPager(List<BaseFragment> fragments, SourceColumn[] columns) {
-        viewPager.setOffscreenPageLimit(3);
+        viewPager.setOffscreenPageLimit(2);//预加载2页
         adapter = new SubFragmentAdapter(getChildFragmentManager(), fragments,columns);
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
