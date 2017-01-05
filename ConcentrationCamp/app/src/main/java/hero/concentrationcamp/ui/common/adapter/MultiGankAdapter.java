@@ -1,4 +1,4 @@
-package hero.concentrationcamp.ui.adapter;
+package hero.concentrationcamp.ui.common.adapter;
 
 import android.app.Activity;
 import android.content.Intent;

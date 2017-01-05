@@ -20,7 +20,7 @@ import hero.concentrationcamp.mvp.contract.GankSubContract;
 import hero.concentrationcamp.mvp.model.entity.Gank;
 import hero.concentrationcamp.mvp.presenter.GankSubFragmentPresenter;
 import hero.concentrationcamp.rxjava.RxBusHelper;
-import hero.concentrationcamp.ui.base.BaseActivity;
+import hero.concentrationcamp.ui.common.base.BaseActivity;
 import hero.concentrationcamp.utils.PixelUtil;
 import hero.concentrationcamp.utils.ToastUtils;
 import hero.concentrationcamp.utils.UmengShare;

@@ -17,9 +17,9 @@ import hero.concentrationcamp.mvp.contract.JokeSubContract;
 import hero.concentrationcamp.mvp.model.entity.Joke;
 import hero.concentrationcamp.mvp.model.entity.SourceColumn;
 import hero.concentrationcamp.mvp.presenter.JokeSubFragmentPresenter;
-import hero.concentrationcamp.ui.base.BaseActivity;
-import hero.concentrationcamp.ui.base.BaseFragment;
-import hero.concentrationcamp.ui.adapter.JokeDataAdapter;
+import hero.concentrationcamp.ui.common.base.BaseActivity;
+import hero.concentrationcamp.ui.common.base.BaseFragment;
+import hero.concentrationcamp.ui.common.adapter.JokeDataAdapter;
 
 /**
  * 易源数据提供的笑话的实际展示的每种类型的子页面
@@ -58,7 +58,6 @@ public class JokeSubFragment extends BaseFragment<JokeSubContract.IJokeSubFragme
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setItemAnimator(null);//解决更新单个item时的闪烁
         mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setItemViewCacheSize(3);
         mAdapter.openLoadMore(10);
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View view = inflater.inflate(R.layout.layout_empty,null);

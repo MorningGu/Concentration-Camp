@@ -30,7 +30,7 @@ import hero.concentrationcamp.fresco.ImageLoader;
 import hero.concentrationcamp.fresco.listener.LoadImageResult;
 import hero.concentrationcamp.fresco.progressbar.CircleProgress;
 import hero.concentrationcamp.mvp.BasePresenter;
-import hero.concentrationcamp.ui.base.BaseActivity;
+import hero.concentrationcamp.ui.common.base.BaseActivity;
 import hero.concentrationcamp.utils.PixelUtil;
 import hero.concentrationcamp.utils.ToastUtils;
 import hero.concentrationcamp.utils.UmengShare;

@@ -14,12 +14,13 @@ import com.umeng.socialize.UMShareAPI;
 import hero.concentrationcamp.R;
 import hero.concentrationcamp.mvp.contract.MainContract;
 import hero.concentrationcamp.mvp.presenter.MainActivityPresenter;
-import hero.concentrationcamp.ui.base.BaseActivity;
-import hero.concentrationcamp.ui.base.BaseFragment;
+import hero.concentrationcamp.ui.common.base.BaseActivity;
+import hero.concentrationcamp.ui.common.base.BaseFragment;
 import hero.concentrationcamp.ui.collection.CollectioinFragment;
 import hero.concentrationcamp.ui.gank.GankFragment;
 import hero.concentrationcamp.ui.joke.JokeFragment;
 import hero.concentrationcamp.utils.ToastUtils;
+import io.reactivex.Flowable;
 
 public class MainActivity extends BaseActivity<MainContract.IMainActivityView,MainActivityPresenter> implements MainContract.IMainActivityView{
 

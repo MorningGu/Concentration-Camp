@@ -1,4 +1,4 @@
-package hero.concentrationcamp.ui.base;
+package hero.concentrationcamp.ui.common.base;
 
 import android.app.Activity;
 import android.os.Bundle;

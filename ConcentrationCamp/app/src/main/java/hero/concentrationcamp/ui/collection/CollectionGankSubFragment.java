@@ -18,9 +18,9 @@ import hero.concentrationcamp.R;
 import hero.concentrationcamp.mvp.contract.GankSubContract;
 import hero.concentrationcamp.mvp.model.entity.Gank;
 import hero.concentrationcamp.mvp.presenter.GankSubFragmentPresenter;
-import hero.concentrationcamp.ui.adapter.MultiGankAdapter;
-import hero.concentrationcamp.ui.base.BaseActivity;
-import hero.concentrationcamp.ui.base.BaseFragment;
+import hero.concentrationcamp.ui.common.adapter.MultiGankAdapter;
+import hero.concentrationcamp.ui.common.base.BaseActivity;
+import hero.concentrationcamp.ui.common.base.BaseFragment;
 import hero.concentrationcamp.utils.UmengShare;
 
 /**

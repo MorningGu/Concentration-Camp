@@ -1,4 +1,4 @@
-package hero.concentrationcamp.ui.adapter;
+package hero.concentrationcamp.ui.common.adapter;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -7,7 +7,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import java.util.List;
 
 import hero.concentrationcamp.mvp.model.entity.SourceColumn;
-import hero.concentrationcamp.ui.base.BaseFragment;
+import hero.concentrationcamp.ui.common.base.BaseFragment;
 
 /**
  * Created by hero on 2016/12/2 0002.

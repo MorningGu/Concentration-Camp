@@ -56,6 +56,7 @@ public class GApplication extends Application {
     }
     private void initFresco(){
         Fresco.initialize(this, ImageLoaderConfig.getImagePipelineConfig(this));
+//        Fresco.initialize(this);
     }
     /**
      * 初始化是否是debug

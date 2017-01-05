@@ -21,9 +21,9 @@ import hero.concentrationcamp.mvp.contract.JokeSubContract;
 import hero.concentrationcamp.mvp.model.entity.Joke;
 import hero.concentrationcamp.mvp.presenter.JokeSubFragmentPresenter;
 import hero.concentrationcamp.ui.ImageActivity;
-import hero.concentrationcamp.ui.adapter.JokeDataAdapter;
-import hero.concentrationcamp.ui.base.BaseActivity;
-import hero.concentrationcamp.ui.base.BaseFragment;
+import hero.concentrationcamp.ui.common.adapter.JokeDataAdapter;
+import hero.concentrationcamp.ui.common.base.BaseActivity;
+import hero.concentrationcamp.ui.common.base.BaseFragment;
 import hero.concentrationcamp.utils.UmengShare;
 
 /**

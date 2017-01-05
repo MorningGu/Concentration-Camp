@@ -5,7 +5,7 @@ import android.support.v4.widget.DrawerLayout;
 import java.util.List;
 
 import hero.concentrationcamp.mvp.model.entity.SourceColumn;
-import hero.concentrationcamp.ui.base.BaseFragment;
+import hero.concentrationcamp.ui.common.base.BaseFragment;
 
 /**
  * Created by hero on 2016/12/2 0002.
