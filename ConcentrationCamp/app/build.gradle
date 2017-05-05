@@ -16,7 +16,7 @@ greendao {
 }
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.0"
+    buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "hero.concentrationcamp"
         minSdkVersion 15
@@ -37,14 +37,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    signingConfigs {
-        debug {
-            storeFile file('ConcentrationCamp.jks')
-            storePassword "wanyi55678"
-            keyAlias "ConcentrationCamp"
-            keyPassword "wanyi55678"
-        }
-    }
+//    signingConfigs {
+//        debug {
+//            storeFile file('ConcentrationCamp.jks')
+//            storePassword "wanyi55678"
+//            keyAlias "ConcentrationCamp"
+//            keyPassword "wanyi55678"
+//        }
+//    }
 }
 
 dependencies {
